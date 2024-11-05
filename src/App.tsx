@@ -7,9 +7,8 @@ import EventTable from "./EventTable"
 import "./App.css";
 
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
   const [selectedFile, setSelectedFile] = useState("");
+  const [eventPage, setEventPage] = useState(0);
   const [events, setEvents]: [Object[], Function] = useState([]);
 
   async function getFile() {
@@ -32,11 +31,6 @@ function App() {
     });
     console.log(parsed);
     setEvents(parsed);
-  }
-
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
   }
 
   return (
