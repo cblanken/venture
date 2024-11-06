@@ -1,3 +1,5 @@
+import EventDetail from "./EventDetail";
+
 interface AppScope {
     events: Object[]
 }
@@ -19,6 +21,9 @@ const EventTable = ({ events }: AppScope): JSX.Element => (
                 {
                     events.map((e: Object, idx: number) =>
                         <tr key={idx}>
+                            <td>
+                                <EventDetail event={e} />
+                            </td>
                             {Object.keys(e).map((k: string, i: number) =>
                                 <td key={`${k}-${i}`}>
                                     {

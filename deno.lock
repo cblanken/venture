@@ -9,6 +9,7 @@
     "npm:@types/react-dom@^18.2.7": "18.3.1",
     "npm:@types/react@^18.2.15": "18.3.12",
     "npm:@vitejs/plugin-react@^4.2.1": "4.3.3_vite@5.4.10_@babel+core@7.26.0",
+    "npm:highlight.js@^11.10.0": "11.10.0",
     "npm:react-dom@^18.2.0": "18.3.1_react@18.3.1",
     "npm:react@^18.2.0": "18.3.1",
     "npm:typescript@^5.2.2": "5.6.3",
@@ -494,6 +495,9 @@
     "globals@11.12.0": {
       "integrity": "sha512-WOBp/EEGUiIsJSp7wcv/y6MO+lV9UoncWqxuFfm8eBwzWNgyfBd6Gz+IeKQ9jCmyhoH99g15M3T+QaVHFjizVA=="
     },
+    "highlight.js@11.10.0": {
+      "integrity": "sha512-SYVnVFswQER+zu1laSya563s+F8VDGt7o35d4utbamowvUNLLMovFqwCLSocpZTz3MgaSRA1IbqRWZv97dtErQ=="
+    },
     "js-tokens@4.0.0": {
       "integrity": "sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ=="
     },
@@ -624,6 +628,7 @@
         "npm:@types/react-dom@^18.2.7",
         "npm:@types/react@^18.2.15",
         "npm:@vitejs/plugin-react@^4.2.1",
+        "npm:highlight.js@^11.10.0",
         "npm:react-dom@^18.2.0",
         "npm:react@^18.2.0",
         "npm:typescript@^5.2.2",

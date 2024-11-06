@@ -1,0 +1,44 @@
+import hljs from "highlight.js";
+import { useEffect } from "react";
+import "highlight.js/styles/github.css";
+
+
+interface AppScope {
+    event: Object
+}
+
+const dialogOpen = (e: MouseEvent) => {
+    let target = e.target as HTMLElement;
+    target.parentElement.querySelector("dialog").showModal();
+}
+
+const dialogClose = (e: MouseEvent) => {
+    let dialog = e.target.parentElement as HTMLDialogElement;
+    dialog.close();
+}
+
+const EventDetail = ({event}: AppScope) => {
+
+    useEffect(() => {
+        hljs.highlightAll();
+      });
+
+    return (
+        <div className="event-detail-container">
+            <button onClick={dialogOpen}>+</button>
+            <dialog className="event-detail">
+                <h3>Event Detail</h3>
+                <pre dangerouslySetInnerHTML={{__html: hljs.highlight(
+                        JSON.stringify(event,null," "), 
+                        {language: "json"}
+                    ).value}}>
+                    
+                </pre>
+                <button onClick={dialogClose}>Close</button>
+            </dialog>
+
+        </div>
+    )
+}
+
+export default EventDetail

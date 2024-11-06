@@ -91,6 +91,11 @@ button {
   outline: none;
 }
 
+/* Event Detail */
+dialog pre {
+  text-align: left;
+}
+
 #greet-input {
   margin-right: 5px;
 }
