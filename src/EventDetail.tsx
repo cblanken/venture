@@ -9,7 +9,10 @@ interface AppScope {
 
 const dialogOpen = (e: MouseEvent) => {
     let target = e.target as HTMLElement;
-    target.parentElement.querySelector("dialog").showModal();
+    let dialog = target.parentElement?.querySelector("dialog");
+    dialog?.showModal();
+    dialog?.scrollTo(0,0);
+    
 }
 
 const dialogClose = (e: MouseEvent) => {
