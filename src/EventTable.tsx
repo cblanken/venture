@@ -1,44 +1,57 @@
 import EventDetail from "./EventDetail";
+import { Column } from "./types";
 
 interface AppScope {
-    events: Object[]
+    events: Object[],
+    columns: Column[]
 }
 
-const EventTable = ({ events }: AppScope): JSX.Element => (
-    <>
-        <h2>Loaded Events</h2>
-        <table>
-            <thead>
-                <tr>
-                    {Object.keys(events[0]).map((k: string, i: number) =>
-                        <td key={`header-${i}`}>
-                            {k}
-                        </td>
-                    )}
-                </tr>
-            </thead>
-            <tbody>
-                {
-                    events.map((e: Object, idx: number) =>
-                        <tr key={idx}>
-                            <td>
-                                <EventDetail event={e} />
+const EventTable = ({ events, columns }: AppScope): JSX.Element => {
+
+    const selectedColumns = columns
+        .filter((c) => c.selected)
+        .map((c) => c.name);
+
+    return (
+        <>
+            <h2>Loaded Events</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <td>Detail View</td>
+                        {selectedColumns.map((c: string, i: number) =>
+                            <td key={`col-${i}`}>
+                                {c}
                             </td>
-                            {Object.keys(e).map((k: string, i: number) =>
-                                <td key={`${k}-${i}`}>
-                                    {
-                                        typeof ((e as any)[k]) == "object"
-                                            ? "Object"
-                                            : (e as any)[k]
-                                    }
+                        )}
+                    </tr>
+                </thead>
+                <tbody>
+                    {
+                        events.map((e: Object, idx: number) =>
+                            <tr key={idx}>
+                                <td>
+                                    <EventDetail event={e} />
                                 </td>
-                            )}
-                        </tr>
-                    )
-                }
-            </tbody>
-        </table>
-    </>
-)
+                                {Object.keys(e).map((k: string, i: number) =>
+                                    selectedColumns.includes(k) ?
+                                    <td key={`${k}-${i}`}>
+                                        {
+                                            typeof ((e as any)[k]) == "object"
+                                                ? "Object"
+                                                : (e as any)[k]
+                                        }
+                                    </td>
+                                    : null
+                                )}
+                            </tr>
+                        )
+                    }
+                </tbody>
+            </table>
+        </>
+    )
+
+}
 
 export default EventTable;

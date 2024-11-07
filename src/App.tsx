@@ -1,24 +1,20 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { PageResult, Column } from "./types";
 import { homeDir } from '@tauri-apps/api/path';
-import { open, DialogFilter } from "@tauri-apps/plugin-dialog";
-import EventTable from "./EventTable"
+import { open } from "@tauri-apps/plugin-dialog";
+import ColumnSelector from "./ColumnSelector";
+import EventTable from "./EventTable";
 
 import "./App.css";
 
 const DEFAULT_PAGE_SIZE = 10;
 
-interface PageResult {
-  events: string[],
-  page_num: number,
-  page_size: number,
-  total_events: number
-}
-
 function App() {
-  const [selectedFile, setSelectedFile] = useState("");
+  // const [selectedFile, setSelectedFile] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [events, setEvents]: [Object[], Function] = useState([]);
+  const [columns, setColumns]: [Column[], Function] = useState([]);
   const [totalEvents, setTotalEvents]: [number, Function] = useState(0);
   const [pageSize, setPageSize]: [number, Function] = useState(DEFAULT_PAGE_SIZE);
 
@@ -26,6 +22,7 @@ function App() {
   async function parseEvents(eventStrings: string[]) {
     return eventStrings.map( (j: string) => {
       let json = JSON.parse(j);
+      // This part is tricky. We flatted the object to make all keys available
       return Object.assign({}, json.Event.EventData, json.Event.System);
     });
   }
@@ -47,15 +44,23 @@ function App() {
         name: ""
       }]
     });
-    console.log(selected);
+
     let res: PageResult = await invoke("load_evtx", { selected });
     let events: Object[] = await parseEvents(res.events);
+    let columns = Object.keys(events[0]).map((c) => ({
+      name: c,
+      selected: true
+    }));
+
     console.log(events);
+
     setCurrentPage(res.page_num);
     setTotalEvents(res.total_events);
     setPageSize(res.page_size);
     setEvents(events);
+    setColumns(columns);
   }
+
 
   return (
     <main className="container">
@@ -64,7 +69,8 @@ function App() {
       {
         events.length > 0 ?
         <>
-          <EventTable events={events}></EventTable>
+          <ColumnSelector columns={columns} setColumns={setColumns} />
+          <EventTable events={events} columns={columns} />
           <div className="paginator">
             <p>
               <button 
