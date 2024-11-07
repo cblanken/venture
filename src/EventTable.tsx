@@ -12,6 +12,11 @@ const EventTable = ({ events, columns }: AppScope): JSX.Element => {
         .filter((c) => c.selected)
         .map((c) => c.name);
 
+    const openDetailView = (e: any) => {
+        let target = e.target as HTMLElement;
+        target.querySelector("dialog")?.showModal();
+    }
+
     return (
         <>
             <h2>Loaded Events</h2>
@@ -29,7 +34,10 @@ const EventTable = ({ events, columns }: AppScope): JSX.Element => {
                 <tbody>
                     {
                         events.map((e: Object, idx: number) =>
-                            <tr key={idx}>
+                            <tr 
+                                key={idx}
+                                onDoubleClick={openDetailView}
+                            >
                                 <td>
                                     <EventDetail event={e} />
                                 </td>
