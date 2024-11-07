@@ -33,12 +33,12 @@ export default function ColumnSelector({columns, setColumns}: AppScope) {
                 onChange={selectColumns}
                 size={10}
             >
-                { columns.map((c: Column, idx: number) => (
+                { columns.map((c) => c.name).sort().map((c: string, idx: number) => (
                     <option 
                         key={`col-${idx}`} 
-                        value={c.name} 
+                        value={c} 
                     >
-                        {c.name}
+                        {c}
                     </option>
                 ))}
             </select>
