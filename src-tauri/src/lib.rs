@@ -1,15 +1,15 @@
-use tauri::{Builder, Manager, State};
-use std::sync::Mutex;
-use serde::Serialize;
 use evtx;
+use serde::Serialize;
+use std::cmp::min;
+use std::sync::Mutex;
+use tauri::{Builder, Manager, State};
 
 const DEFAULT_PAGE_SIZE: usize = 10;
 
 #[derive(Default)]
 struct AppState {
     events: Mutex<Vec<String>>,
-    page_size: Mutex<usize>
-
+    page_size: Mutex<usize>,
 }
 
 #[derive(Default, Debug, Serialize)]
@@ -17,7 +17,7 @@ struct PageResult {
     events: Vec<String>,
     page_num: usize,
     page_size: usize,
-    total_events: usize
+    total_events: usize,
 }
 
 #[tauri::command]
@@ -29,7 +29,7 @@ async fn select_page(selected: usize, state: State<'_, AppState>) -> Result<Page
     let res = PageResult {
         events: events[start_idx..end_idx].to_vec(),
         page_num: selected,
-        page_size: page_size,
+        page_size,
         total_events: events.len(),
     };
     Ok(res)
@@ -37,20 +37,18 @@ async fn select_page(selected: usize, state: State<'_, AppState>) -> Result<Page
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
-async fn load_evtx(selected: String, state: State<'_, AppState >) -> Result<PageResult, ()> {
+async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageResult, ()> {
     let mut parser = evtx::EvtxParser::from_path(selected).unwrap();
-    let events: Vec<String> = parser.records_json().map(|r| {
-        r.unwrap().data
-    })  
-    .collect();
-    *state.events.lock().unwrap() = events.clone();
+    let events: Vec<String> = parser.records_json().map(|r| r.unwrap().data).collect();
+    // This is needed for lil baby evtx files.
+    let page_size = min(events.len(), DEFAULT_PAGE_SIZE);
+    state.events.lock().unwrap().clone_from(&events);
     Ok(PageResult {
-        events: events[0..DEFAULT_PAGE_SIZE].to_vec(),
+        events: events[0..page_size].to_vec(),
         page_num: 1,
-        page_size: DEFAULT_PAGE_SIZE,
-        total_events: events.len()
+        page_size,
+        total_events: events.len(),
     })
-
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -59,7 +57,7 @@ pub fn run() {
         .setup(|app| {
             app.manage(AppState {
                 events: Mutex::new(vec![]),
-                page_size: Mutex::new(DEFAULT_PAGE_SIZE)
+                page_size: Mutex::new(DEFAULT_PAGE_SIZE),
             });
             Ok(())
         })
