@@ -47,9 +47,10 @@ function App() {
 
     let res: PageResult = await invoke("load_evtx", { selected });
     let events: Object[] = await parseEvents(res.events);
-    let columns = Object.keys(events[0]).map((c) => ({
+    let columns: Column[] = Object.keys(events[0]).map((c) => ({
       name: c,
-      selected: true
+      selected: true,
+      filter: null
     }));
 
     console.log(events);

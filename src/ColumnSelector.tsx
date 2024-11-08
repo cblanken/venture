@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Column } from "./types";
 
-interface AppScope {
+interface ComponentProps {
     columns: Column[],
     setColumns: Function
 }
 
 
-export default function ColumnSelector({columns, setColumns}: AppScope) {
+export default function ColumnSelector({columns, setColumns}: ComponentProps) {
     
     const selectColumns = (e: any) => {
         let target: HTMLSelectElement = e.target as HTMLSelectElement;

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import "highlight.js/styles/github.css";
 
 
-interface AppScope {
+interface ComponentProps {
     event: Object
 }
 
@@ -20,7 +20,7 @@ const dialogClose = (e: any) => {
     dialog.close();
 }
 
-const EventDetail = ({event}: AppScope) => {
+const EventDetail = ({event}: ComponentProps) => {
 
     useEffect(() => {
         hljs.highlightAll();

@@ -1,12 +1,12 @@
 import EventDetail from "./EventDetail";
 import { Column } from "./types";
 
-interface AppScope {
+interface ComponentProps {
     events: Object[],
     columns: Column[]
 }
 
-const EventTable = ({ events, columns }: AppScope): JSX.Element => {
+const EventTable = ({ events, columns }: ComponentProps): JSX.Element => {
 
     const selectedColumns = columns
         .filter((c) => c.selected)
@@ -27,6 +27,7 @@ const EventTable = ({ events, columns }: AppScope): JSX.Element => {
                         {selectedColumns.map((c: string, i: number) =>
                             <td key={`col-${i}`}>
                                 {c}
+                                <span className="filter-btn"> [F]</span>
                             </td>
                         )}
                     </tr>
