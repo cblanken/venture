@@ -50,7 +50,7 @@ function App() {
     let columns: Column[] = Object.keys(events[0]).map((c) => ({
       name: c,
       selected: true,
-      filter: null
+      filter: ""
     }));
 
     console.log(events);
@@ -62,6 +62,16 @@ function App() {
     setColumns(columns);
   }
 
+  const setFilter = (columnName: string, filter: string) => {
+    let colIdx = columns.findIndex((c: Column) => c.name === columnName);
+    let newCol: Column = {
+      name: columns[colIdx].name,
+      selected: columns[colIdx].selected,
+      filter
+    };
+    setColumns(columns.toSpliced(colIdx,1,newCol));
+  }
+
 
   return (
     <main className="container">
@@ -71,7 +81,7 @@ function App() {
         events.length > 0 ?
         <>
           <ColumnSelector columns={columns} setColumns={setColumns} />
-          <EventTable events={events} columns={columns} />
+          <EventTable events={events} columns={columns} setFilter={setFilter}/>
           <div className="paginator">
             <p>
               <button 

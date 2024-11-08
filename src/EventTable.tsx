@@ -1,16 +1,17 @@
 import EventDetail from "./EventDetail";
 import { Column } from "./types";
+import FilterButton from "./FilterButton";
 
 interface ComponentProps {
     events: Object[],
-    columns: Column[]
+    columns: Column[],
+    setFilter: Function
 }
 
-const EventTable = ({ events, columns }: ComponentProps): JSX.Element => {
+const EventTable = ({ events, columns, setFilter }: ComponentProps): JSX.Element => {
 
     const selectedColumns = columns
         .filter((c) => c.selected)
-        .map((c) => c.name);
 
     const openDetailView = (e: any) => {
         let target = e.target as HTMLElement;
@@ -24,10 +25,10 @@ const EventTable = ({ events, columns }: ComponentProps): JSX.Element => {
                 <thead>
                     <tr>
                         <td>Detail View</td>
-                        {selectedColumns.map((c: string, i: number) =>
+                        {selectedColumns.map((c: Column, i: number) =>
                             <td key={`col-${i}`}>
-                                {c}
-                                <span className="filter-btn"> [F]</span>
+                                {c.name}
+                                <FilterButton column={c} setFilter={setFilter} />
                             </td>
                         )}
                     </tr>
@@ -43,7 +44,9 @@ const EventTable = ({ events, columns }: ComponentProps): JSX.Element => {
                                     <EventDetail event={e} />
                                 </td>
                                 {Object.keys(e).map((k: string, i: number) =>
-                                    selectedColumns.includes(k) ?
+                                    selectedColumns
+                                    .map((c) => c.name)
+                                    .includes(k) ?
                                     <td key={`${k}-${i}`}>
                                         {
                                             typeof ((e as any)[k]) == "object"

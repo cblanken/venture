@@ -7,19 +7,28 @@ export interface PageResult {
 
 export interface Column {
   name: string,
-  selected: boolean
+  selected: boolean,
+  filter: string
 }
 
-class Filter {
+// export enum FilterType {
+//   Match,
+//   DateRange,
+//   NumRange
+// }
 
-  filterFunction: Function;
+// export class Filter {
 
-  constructor(filterFunction: Function) {
-    this.filterFunction = filterFunction;
-  }
+//   filterFunction: Function;
+//   type: FilterType
 
-  run(e: Object): boolean {
-    return this.filterFunction(e);
-  }
+//   constructor(filterFunction: Function, type: FilterType) {
+//     this.filterFunction = filterFunction;
+//     this.type = type;
+//   }
 
-}
+//   run(e: Object): boolean {
+//     return this.filterFunction(e);
+//   }
+
+// }
