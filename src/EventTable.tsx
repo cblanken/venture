@@ -1,6 +1,6 @@
 import EventDetail from "./EventDetail";
 import { Column, ColumnMap } from "./types";
-import FilterButton from "./FilterButton";
+import FilterModal from "./FilterModal";
 
 interface ComponentProps {
     events: Object[],
@@ -29,7 +29,7 @@ const EventTable = ({ events, columns, setFilter }: ComponentProps): JSX.Element
                         {selectedColumns.map((c: Column, i: number) =>
                             <td key={`col-${i}`}>
                                 {c.name}
-                                <FilterButton column={c} setFilter={setFilter} />
+                                <FilterModal column={c} setFilter={setFilter} />
                             </td>
                         )}
                     </tr>

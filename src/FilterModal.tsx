@@ -6,7 +6,7 @@ interface ComponentProps {
     setFilter: Function
 }
 
-export default function FilterButton({column, setFilter}: ComponentProps) {
+export default function FilterModal({column, setFilter}: ComponentProps) {
 
     const [currentFilter, setCurrentFilter] = useState("");
 
