@@ -11,14 +11,18 @@ export default function ColumnSelector({columns, setColumns}: ComponentProps) {
     
     const selectColumns = (e: any) => {
         let target: HTMLSelectElement = e.target as HTMLSelectElement;
-        let newColumns = Array.from(target.selectedOptions)
-            .map((o) => o.value);
-        setColumns(
-            columns.map((c) => ({
-                    name: c.name,
-                    selected: newColumns.includes(c.name)
-            }))
-        );
+        let newColumns = {...columns};
+        let selectedColumns: Array<string> = Array.from(target.selectedOptions)
+            .map((o: HTMLOptionElement) => o.value);
+        Object.keys(newColumns).forEach((k: string) => {
+            let col: Column = newColumns[k];
+            if (selectedColumns.includes(k)) {
+                col.selected = true;
+            } else {
+                col.selected = false;
+            }
+        })
+        setColumns(newColumns);
     }
     return (
         <>
@@ -26,14 +30,14 @@ export default function ColumnSelector({columns, setColumns}: ComponentProps) {
             <select 
                 multiple={true} 
                 value={
-                    columns
+                    Object.values(columns)
                     .filter((c) => c.selected)
                     .map((c) => c.name)
                 }
                 onChange={selectColumns}
                 size={10}
             >
-                { columns.map((c) => c.name).sort().map((c: string, idx: number) => (
+                { Object.values(columns).map((c) => c.name).sort().map((c: string, idx: number) => (
                     <option 
                         key={`col-${idx}`} 
                         value={c} 

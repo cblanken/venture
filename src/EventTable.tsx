@@ -10,8 +10,9 @@ interface ComponentProps {
 
 const EventTable = ({ events, columns, setFilter }: ComponentProps): JSX.Element => {
 
-    const selectedColumns = columns
-        .filter((c) => c.selected)
+    const selectedColumns = Object.values(columns) 
+        .filter((c: Column) => c.selected)
+
 
     const openDetailView = (e: any) => {
         let target = e.target as HTMLElement;
