@@ -66,12 +66,14 @@ function App() {
   }
 
   const setFilter = (columnName: string, filter: string) => {
+    console.log(`Updating ${columnName}`)
     let oldCol: Column = columns[columnName];
     let newCol: Column = {
       name: oldCol.name,
       selected: oldCol.selected,
-      filter
+      filter: oldCol.filter + filter
     };
+    console.log(newCol.filter);
     setColumns({...columns, columnName: newCol});
   }
 

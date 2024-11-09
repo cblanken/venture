@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Column } from "./types";
 
 interface ComponentProps {
@@ -6,6 +7,8 @@ interface ComponentProps {
 }
 
 export default function FilterButton({column, setFilter}: ComponentProps) {
+
+    const [currentFilter, setCurrentFilter] = useState("");
 
     const openDialog = (e: any) => {
         let target: HTMLElement = e.target;
@@ -22,7 +25,8 @@ export default function FilterButton({column, setFilter}: ComponentProps) {
 
     const updateFilter = (e:any) => {
         let target: HTMLInputElement = e.target;
-        setFilter(column.name, target.value)
+        setCurrentFilter(e.target.value);
+        setFilter(column.name, currentFilter)
     }
 
     return (
@@ -33,7 +37,7 @@ export default function FilterButton({column, setFilter}: ComponentProps) {
                 <label>Match Pattern:</label>
                 <input 
                     type="text" 
-                    value={column.filter}
+                    value={currentFilter}
                     onChange={updateFilter}
                 />
                 <button onClick={closeDialog}>Close</button> 
