@@ -1,10 +1,10 @@
 import EventDetail from "./EventDetail";
-import { Column } from "./types";
+import { Column, ColumnMap } from "./types";
 import FilterButton from "./FilterButton";
 
 interface ComponentProps {
     events: Object[],
-    columns: Column[],
+    columns: ColumnMap,
     setFilter: Function
 }
 

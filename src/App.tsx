@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { PageResult, Column } from "./types";
+import { PageResult, ColumnMap, Column } from "./types";
 import { homeDir } from '@tauri-apps/api/path';
 import { open } from "@tauri-apps/plugin-dialog";
 import ColumnSelector from "./ColumnSelector";
@@ -14,7 +14,7 @@ function App() {
   // const [selectedFile, setSelectedFile] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [events, setEvents]: [Object[], Function] = useState([]);
-  const [columns, setColumns]: [Column[], Function] = useState([]);
+  const [columns, setColumns]: [ColumnMap, Function] = useState({});
   const [totalEvents, setTotalEvents]: [number, Function] = useState(0);
   const [pageSize, setPageSize]: [number, Function] = useState(DEFAULT_PAGE_SIZE);
 
@@ -47,11 +47,14 @@ function App() {
 
     let res: PageResult = await invoke("load_evtx", { selected });
     let events: Object[] = await parseEvents(res.events);
-    let columns: Column[] = Object.keys(events[0]).map((c) => ({
-      name: c,
-      selected: true,
-      filter: ""
-    }));
+    let columns: ColumnMap = {}; 
+    Object.keys(events[0]).forEach((c: string) => {
+      columns[c] = { 
+        name: c,
+        selected: true,
+        filter: ""}
+      }
+    );
 
     console.log(events);
 
@@ -63,13 +66,13 @@ function App() {
   }
 
   const setFilter = (columnName: string, filter: string) => {
-    let colIdx = columns.findIndex((c: Column) => c.name === columnName);
+    let oldCol: Column = columns[columnName];
     let newCol: Column = {
-      name: columns[colIdx].name,
-      selected: columns[colIdx].selected,
+      name: oldCol.name,
+      selected: oldCol.selected,
       filter
     };
-    setColumns(columns.toSpliced(colIdx,1,newCol));
+    setColumns({...columns, columnName: newCol});
   }
 
 

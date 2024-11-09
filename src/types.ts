@@ -11,6 +11,8 @@ export interface Column {
   filter: string
 }
 
+export type ColumnMap = Record<string, Column>
+
 // export enum FilterType {
 //   Match,
 //   DateRange,

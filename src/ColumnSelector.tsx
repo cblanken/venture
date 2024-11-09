@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Column } from "./types";
+import { Column, ColumnMap } from "./types";
 
 interface ComponentProps {
-    columns: Column[],
+    columns: ColumnMap,
     setColumns: Function
 }
 
