@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Column } from "./types";
 
 interface ComponentProps {
@@ -8,7 +8,7 @@ interface ComponentProps {
 
 export default function FilterModal({column, setFilter}: ComponentProps) {
 
-    const [currentFilter, setCurrentFilter] = useState("");
+    const [filterInput, setFilterInput] = useState("");
 
     const openDialog = (e: any) => {
         let target: HTMLElement = e.target;
@@ -25,8 +25,7 @@ export default function FilterModal({column, setFilter}: ComponentProps) {
 
     const updateFilter = (e:any) => {
         let target: HTMLInputElement = e.target;
-        setCurrentFilter(e.target.value);
-        setFilter(column.name, currentFilter)
+        setFilterInput(e.target.value);
     }
 
     return (
@@ -34,13 +33,23 @@ export default function FilterModal({column, setFilter}: ComponentProps) {
             <span className="filter-btn" onClick={openDialog}> [F]</span>
             <dialog className="filter-dialog">
                 <h3>Filter {column.name}</h3>
-                <label>Match Pattern:</label>
-                <input 
-                    type="text" 
-                    value={currentFilter}
-                    onChange={updateFilter}
-                />
-                <button onClick={closeDialog}>Close</button> 
+                <form 
+                    onSubmit={(e: any) => {
+                        e.preventDefault();
+                        let target: HTMLFormElement | null = e.target;
+                        let input = target?.querySelector("input");
+                        setFilter(column.name, input?.value)
+                    }}
+                >
+                    <label>Match Pattern:</label>
+                    <input 
+                        type="text" 
+                        value={filterInput}
+                        onChange={updateFilter}
+                    />
+                    <button type="submit">Set Filter</button>
+                </form>
+                <button type="button" onClick={closeDialog}>Close</button> 
             </dialog>
         </>
     )

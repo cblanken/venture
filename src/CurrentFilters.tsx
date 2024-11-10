@@ -11,7 +11,7 @@ export default function CurrentFilters({ columns }: ComponentProps) {
                 Object.values(columns)
                 .map((c: Column) => (
                     c.filter !== "" ?
-                    <li className="filter-item">
+                    <li key={`filter-${c.name}`} className="filter-item">
                         {c.name}: {c.filter}
                     </li>
                     : null

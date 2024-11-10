@@ -19,6 +19,21 @@ const EventTable = ({ events, columns, setFilter }: ComponentProps): JSX.Element
         target.querySelector("dialog")?.showModal();
     }
 
+
+    const filterMatch = (e: {[key: string]: any}): boolean => {
+
+        // If there are no filters, all's well
+        let filteredColumns = Object.values(columns).filter((c: Column) => c.filter !== "");
+        console.log(filteredColumns);
+        if (filteredColumns.length == 0) return true;
+
+        return filteredColumns.some((c: Column) => {
+            if (!(c.name in e)) return false;
+            return c.filter.includes(e[c.name])
+        });
+
+    }
+
     return (
         <>
             <h2>Loaded Events</h2>
@@ -36,7 +51,7 @@ const EventTable = ({ events, columns, setFilter }: ComponentProps): JSX.Element
                 </thead>
                 <tbody>
                     {
-                        events.map((e: Object, idx: number) =>
+                        events.filter(filterMatch).map((e: Object, idx: number) =>
                             <tr 
                                 key={idx}
                                 onDoubleClick={openDetailView}
