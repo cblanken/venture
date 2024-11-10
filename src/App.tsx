@@ -4,6 +4,7 @@ import { PageResult, ColumnMap, Column } from "./types";
 import { homeDir } from '@tauri-apps/api/path';
 import { open } from "@tauri-apps/plugin-dialog";
 import ColumnSelector from "./ColumnSelector";
+import CurrentFilters from "./CurrentFilters";
 import EventTable from "./EventTable";
 
 import "./App.css";
@@ -52,9 +53,9 @@ function App() {
       columns[c] = { 
         name: c,
         selected: true,
-        filter: ""}
+        filter: ""
       }
-    );
+    });
 
     console.log(events);
 
@@ -86,6 +87,7 @@ function App() {
         events.length > 0 ?
         <>
           <ColumnSelector columns={columns} setColumns={setColumns} />
+          <CurrentFilters columns={columns} />
           <EventTable events={events} columns={columns} setFilter={setFilter}/>
           <div className="paginator">
             <p>
