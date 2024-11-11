@@ -23,8 +23,8 @@ function App() {
   async function parseEvents(eventStrings: string[]) {
     return eventStrings.map( (j: string) => {
       let json = JSON.parse(j);
-      // This part is tricky. We flatted the object to make all keys available
-      return Object.assign({}, json.Event.EventData, json.Event.System);
+      return json;
+    
     });
   }
 
@@ -47,7 +47,7 @@ function App() {
     });
 
     let res: PageResult = await invoke("load_evtx", { selected });
-    let events: Object[] = await parseEvents(res.events);
+    let events: Object[] = await res.events;
     let columns: ColumnMap = {}; 
     Object.keys(events[0]).forEach((c: string) => {
       columns[c] = { 

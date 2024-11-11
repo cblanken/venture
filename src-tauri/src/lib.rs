@@ -1,24 +1,44 @@
 use evtx;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
+use serde_json::{json, Value, Map, to_string, from_str};
 use std::cmp::min;
 use std::sync::Mutex;
 use tauri::{Builder, Manager, State};
 
 const DEFAULT_PAGE_SIZE: usize = 10;
 
+type Event = Map<String, Value>;
+
 #[derive(Default)]
 struct AppState {
-    events: Mutex<Vec<String>>,
+    events: Mutex<Vec<Event>>,
     page_size: Mutex<usize>,
 }
 
 #[derive(Default, Debug, Serialize)]
 struct PageResult {
-    events: Vec<String>,
+    events: Vec<Event>,
     page_num: usize,
     page_size: usize,
     total_events: usize,
 }
+
+
+#[derive(Default, Debug, Deserialize)]
+struct Filter {
+    column_name: String,
+    pattern: String
+}
+
+///
+/// To minimize data processing, we will only convert the single page of results into 
+/// `serde_json` Objeccts on demand.
+/// 
+async fn filter_events(page:Vec<Event>, filters: Vec<Filter>) -> Vec<Event> {
+ page
+
+}
+
 
 #[tauri::command]
 async fn select_page(selected: usize, state: State<'_, AppState>) -> Result<PageResult, ()> {
@@ -39,7 +59,28 @@ async fn select_page(selected: usize, state: State<'_, AppState>) -> Result<Page
 #[tauri::command]
 async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageResult, ()> {
     let mut parser = evtx::EvtxParser::from_path(selected).unwrap();
-    let events: Vec<String> = parser.records_json().map(|r| r.unwrap().data).collect();
+    let events: Vec<Event> = parser.records_json_value()
+        .map(|r| {
+            // We're flattening the the Event object here to make
+            // EvetData and System data on the same level
+            let mut data: Event = r.unwrap()
+                .data["Event"]
+                .as_object_mut()
+                .unwrap()
+                .to_owned();
+            let mut e: Event = data["System"]
+                .clone()
+                .as_object_mut()
+                .unwrap()
+                .to_owned();
+
+            if data.contains_key("EventData") {
+                e.append(&mut data["EventData"].as_object_mut().unwrap_or(&mut Map::new()));
+            }
+
+            e
+        })
+        .collect();
     // This is needed for lil baby evtx files.
     let page_size = min(events.len(), DEFAULT_PAGE_SIZE);
     state.events.lock().unwrap().clone_from(&events);
