@@ -19,21 +19,6 @@ const EventTable = ({ events, columns, setFilter }: ComponentProps): JSX.Element
         target.querySelector("dialog")?.showModal();
     }
 
-
-    const filterMatch = (e: {[key: string]: any}): boolean => {
-
-        // If there are no filters, all's well
-        let filteredColumns = Object.values(columns).filter((c: Column) => c.filter !== "");
-        console.log(filteredColumns);
-        if (filteredColumns.length == 0) return true;
-
-        return filteredColumns.some((c: Column) => {
-            if (!(c.name in e)) return false;
-            return c.filter.includes(e[c.name])
-        });
-
-    }
-
     return (
         <>
             <h2>Loaded Events</h2>
@@ -51,7 +36,7 @@ const EventTable = ({ events, columns, setFilter }: ComponentProps): JSX.Element
                 </thead>
                 <tbody>
                     {
-                        events.filter(filterMatch).map((e: Object, idx: number) =>
+                        events.map((e: Object, idx: number) =>
                             <tr 
                                 key={idx}
                                 onDoubleClick={openDetailView}
@@ -59,18 +44,17 @@ const EventTable = ({ events, columns, setFilter }: ComponentProps): JSX.Element
                                 <td>
                                     <EventDetail event={e} />
                                 </td>
-                                {Object.keys(e).map((k: string, i: number) =>
-                                    selectedColumns
-                                    .map((c) => c.name)
-                                    .includes(k) ?
-                                    <td key={`${k}-${i}`}>
+                                {selectedColumns.map((c: Column, i: number) =>
+                                    Object.keys(e)
+                                    .includes(c.name) ?
+                                    <td key={`${c.name}-${i}`}>
                                         {
-                                            typeof ((e as any)[k]) == "object"
+                                            typeof ((e as any)[c.name]) == "object"
                                                 ? "Object"
-                                                : (e as any)[k]
+                                                : (e as any)[c.name]
                                         }
                                     </td>
-                                    : null
+                                    : ""
                                 )}
                             </tr>
                         )

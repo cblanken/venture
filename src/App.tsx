@@ -31,7 +31,7 @@ function App() {
   async function getPage(selected: number) {
     let res: PageResult = await invoke("select_page", { selected });
     setCurrentPage(res.page_num);
-    setEvents(await parseEvents(res.events));
+    setEvents(res.events);
   }
 
   async function getFile() {
