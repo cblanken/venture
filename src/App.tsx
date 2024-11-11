@@ -19,15 +19,6 @@ function App() {
   const [totalEvents, setTotalEvents]: [number, Function] = useState(0);
   const [pageSize, setPageSize]: [number, Function] = useState(DEFAULT_PAGE_SIZE);
 
-
-  async function parseEvents(eventStrings: string[]) {
-    return eventStrings.map( (j: string) => {
-      let json = JSON.parse(j);
-      return json;
-    
-    });
-  }
-
   async function getPage(selected: number) {
     let res: PageResult = await invoke("select_page", { selected });
     setCurrentPage(res.page_num);
