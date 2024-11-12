@@ -19,10 +19,15 @@ function App() {
   const [totalEvents, setTotalEvents]: [number, Function] = useState(0);
   const [pageSize, setPageSize]: [number, Function] = useState(DEFAULT_PAGE_SIZE);
 
-  async function getPage(selected: number) {
-    let res: PageResult = await invoke("select_page", { selected });
+  async function getPage(selected: number, newColumns: {[key: string]: Column} | null) {
+    let cols = newColumns || columns; 
+    let filteredColumns = Object.values(cols)
+      .filter((c: Column) => c.filter != "");
+    let res: PageResult = await invoke("select_page", { selected, filteredColumns });
+    console.log(res);
     setCurrentPage(res.page_num);
     setEvents(res.events);
+    setTotalEvents(res.total_events);
   }
 
   async function getFile() {
@@ -63,10 +68,14 @@ function App() {
     let newCol: Column = {
       name: oldCol.name,
       selected: oldCol.selected,
-      filter: oldCol.filter + filter
+      filter
     };
     console.log(newCol.filter);
-    setColumns({...columns, columnName: newCol});
+    let newColumns = {...columns};
+    newColumns[columnName] = newCol;
+    console.log(newColumns[columnName]);
+    setColumns(newColumns);
+    getPage(1, newColumns);
   }
 
 
@@ -85,7 +94,7 @@ function App() {
               <button 
                 className="paginate prev" 
                 disabled={currentPage == 1} 
-                onClick={() => getPage(currentPage - 1)}
+                onClick={() => getPage(currentPage - 1, null)}
               >
                 &lt; 
               </button>
@@ -93,7 +102,7 @@ function App() {
               <button 
                 className="paginate next" 
                 disabled={currentPage === (Math.ceil(totalEvents / pageSize))} 
-                onClick={() => getPage(currentPage + 1)}
+                onClick={() => getPage(currentPage + 1, null)}
               > 
                 &gt;
               </button>

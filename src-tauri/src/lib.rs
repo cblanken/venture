@@ -1,6 +1,6 @@
 use evtx;
 use serde::{Serialize, Deserialize};
-use serde_json::{json, Value, Map, to_string, from_str};
+use serde_json::{Value, Map};
 use std::cmp::min;
 use std::sync::Mutex;
 use tauri::{Builder, Manager, State};
@@ -25,33 +25,52 @@ struct PageResult {
 
 
 #[derive(Default, Debug, Deserialize)]
-struct Filter {
-    column_name: String,
-    pattern: String
+struct Column {
+    name: String,
+    selected: bool,
+    filter: String
 }
 
 ///
 /// To minimize data processing, we will only convert the single page of results into 
 /// `serde_json` Objeccts on demand.
 /// 
-async fn filter_events(page:Vec<Event>, filters: Vec<Filter>) -> Vec<Event> {
+fn filter_events(page:Vec<Event>, filtered_columns: Vec<Column>) -> Vec<Event> {
+println!("{filtered_columns:?}");
  page
+    .into_iter()
+    .filter(|e| {
+        for c in &filtered_columns {
+            if e.contains_key(&c.name) {
+                if let Some(val) = e[&c.name].as_str() {
+                    println!("Testing {} against {}", &c.filter, val);
+                    if c.filter.contains(val) {
+                        return true;
+                    }
+                }
+            }
+        }   
+        false
+    })
+    .collect()
 
 }
 
 
 #[tauri::command]
-async fn select_page(selected: usize, state: State<'_, AppState>) -> Result<PageResult, ()> {
+async fn select_page(selected: usize, filtered_columns:Vec<Column>, state: State<'_, AppState>) -> Result<PageResult, ()> {
     let page_size = *state.page_size.lock().unwrap();
     let events = state.events.lock().unwrap();
+    let filtered_events = filter_events(events.to_vec(), filtered_columns);
     let start_idx = (selected - 1) * page_size;
-    let end_idx = start_idx + page_size;
+    let end_idx = min(start_idx + page_size, filtered_events.len());
     let res = PageResult {
-        events: events[start_idx..end_idx].to_vec(),
+        events: filtered_events[start_idx..end_idx].to_vec(),
         page_num: selected,
         page_size,
-        total_events: events.len(),
+        total_events: filtered_events.len(),
     };
+    drop(events);
     Ok(res)
 }
 
@@ -75,7 +94,11 @@ async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageR
                 .to_owned();
 
             if data.contains_key("EventData") {
-                e.append(&mut data["EventData"].as_object_mut().unwrap_or(&mut Map::new()));
+                e.append(
+                    data["EventData"]
+                    .as_object_mut()
+                    .unwrap_or(&mut Map::new())
+                );
             }
 
             e
