@@ -27,7 +27,7 @@ struct PageResult {
 #[derive(Default, Debug, Deserialize)]
 struct Column {
     name: String,
-    selected: bool,
+    _selected: bool,
     filter: String
 }
 
@@ -44,9 +44,7 @@ println!("{filtered_columns:?}");
             if e.contains_key(&c.name) {
                 if let Some(val) = e[&c.name].as_str() {
                     println!("Testing {} against {}", &c.filter, val);
-                    if c.filter.contains(val) {
-                        return true;
-                    }
+                    return c.filter.contains(val);
                 }
             }
         }   
