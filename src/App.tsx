@@ -6,6 +6,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import ColumnSelector from "./ColumnSelector";
 import CurrentFilters from "./CurrentFilters";
 import EventTable from "./EventTable";
+import Paginator from "./Paginator";
 
 import "./App.css";
 
@@ -89,25 +90,12 @@ function App() {
           <ColumnSelector columns={columns} setColumns={setColumns} />
           <CurrentFilters columns={columns} setFilter={setFilter} />
           <EventTable events={events} columns={columns} setFilter={setFilter}/>
-          <div className="paginator">
-            <p>
-              <button 
-                className="paginate prev" 
-                disabled={currentPage == 1} 
-                onClick={() => getPage(currentPage - 1, null)}
-              >
-                &lt; 
-              </button>
-              Page {currentPage} of { Math.ceil(totalEvents / pageSize) } 
-              <button 
-                className="paginate next" 
-                disabled={currentPage === (Math.ceil(totalEvents / pageSize))} 
-                onClick={() => getPage(currentPage + 1, null)}
-              > 
-                &gt;
-              </button>
-            </p>
-          </div>
+          <Paginator
+            currentPage={currentPage}
+            pageSize={pageSize}
+            getPage={getPage}
+            totalEvents={totalEvents}
+          />
         </>
         : null
       }
