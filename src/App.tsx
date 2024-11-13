@@ -87,7 +87,7 @@ function App() {
         events.length > 0 ?
         <>
           <ColumnSelector columns={columns} setColumns={setColumns} />
-          <CurrentFilters columns={columns} />
+          <CurrentFilters columns={columns} setFilter={setFilter} />
           <EventTable events={events} columns={columns} setFilter={setFilter}/>
           <div className="paginator">
             <p>
