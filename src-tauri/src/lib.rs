@@ -27,7 +27,7 @@ struct PageResult {
 #[derive(Default, Debug, Deserialize)]
 struct Column {
     name: String,
-    _selected: bool,
+    selected: bool,
     filter: String
 }
 
@@ -43,7 +43,6 @@ println!("{filtered_columns:?}");
         for c in &filtered_columns {
             if e.contains_key(&c.name) {
                 if let Some(val) = e[&c.name].as_str() {
-                    println!("Testing {} against {}", &c.filter, val);
                     return c.filter.contains(val);
                 }
             }
@@ -59,7 +58,10 @@ println!("{filtered_columns:?}");
 async fn select_page(selected: usize, filtered_columns:Vec<Column>, state: State<'_, AppState>) -> Result<PageResult, ()> {
     let page_size = *state.page_size.lock().unwrap();
     let events = state.events.lock().unwrap();
-    let filtered_events = filter_events(events.to_vec(), filtered_columns);
+    let filtered_events = match filtered_columns.len() {
+        0 => events.to_vec(),
+        _ => {filter_events(events.to_vec(), filtered_columns)}
+    }; 
     let start_idx = (selected - 1) * page_size;
     let end_idx = min(start_idx + page_size, filtered_events.len());
     let res = PageResult {
