@@ -52,6 +52,14 @@ println!("{filtered_columns:?}");
     .collect()
 
 }
+///
+/// Sorts the Page by a given column before passing back.
+/// 
+/// This is nested with [[filter_events]]
+/// 
+fn sort_events(page:Vec<Event>, sort_column:Column) -> Vec<Event> {
+    page
+}
 
 
 #[tauri::command]
