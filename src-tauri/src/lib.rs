@@ -58,7 +58,21 @@ println!("{filtered_columns:?}");
 /// This is nested with [[filter_events]]
 /// 
 fn sort_events(page:Vec<Event>, sort_column:Column) -> Vec<Event> {
-    page
+    let mut sorted = page.clone();
+    sorted.sort_by(|a, b| {
+        if let Some(a_val) = a.get(&sort_column.name) {
+            match b.get(&sort_column.name) {
+                Some(b_val) => {
+                    let a_str = a_val.as_str().unwrap();
+                    let b_str = b_val.as_str().unwrap();
+                    return a_str.cmp(b_str);
+                },
+                None => { return std::cmp::Ordering::Equal; }
+            }
+        }
+        std::cmp::Ordering::Equal
+    });
+    sorted
 }
 
 
