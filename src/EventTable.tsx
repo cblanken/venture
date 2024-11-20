@@ -7,7 +7,8 @@ interface ComponentProps {
     columns: ColumnMap,
     setFilter: Function,
     setSortColumn: Function,
-    getPage: Function
+    getPage: Function,
+    pageSize: number
 }
 
 const EventTable = ({ 
@@ -15,7 +16,8 @@ const EventTable = ({
     columns, 
     setFilter, 
     setSortColumn, 
-    getPage 
+    getPage,
+    pageSize 
 }: ComponentProps): JSX.Element => {
 
     const selectedColumns = Object.values(columns) 
@@ -39,7 +41,7 @@ const EventTable = ({
                                 key={`col-${i}`}
                                 onClick={() => {
                                     setSortColumn(c);
-                                    getPage(1, selectedColumns);
+                                    getPage(1, pageSize, selectedColumns);
                                 }}
                             >
                                 {c.name}

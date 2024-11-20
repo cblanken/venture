@@ -7,10 +7,16 @@ import ColumnSelector from "./ColumnSelector";
 import CurrentFilters from "./CurrentFilters";
 import EventTable from "./EventTable";
 import Paginator from "./Paginator";
+import PageSizeSelector from "./PageSizeSelector";
 
 import "./App.css";
 
 const DEFAULT_PAGE_SIZE = 10;
+const PAGE_SIZES = [
+  10,
+  50,
+  100
+]
 
 function App() {
   // const [selectedFile, setSelectedFile] = useState("");
@@ -21,11 +27,12 @@ function App() {
   const [totalEvents, setTotalEvents]: [number, Function] = useState(0);
   const [pageSize, setPageSize]: [number, Function] = useState(DEFAULT_PAGE_SIZE);
 
-  async function getPage(selected: number, newColumns: {[key: string]: Column} | null) {
+  async function getPage(selected: number, pageSize: number, newColumns: {[key: string]: Column} | null) {
     let cols = newColumns || columns; 
+    console.log(pageSize);
     let filteredColumns = Object.values(cols)
       .filter((c: Column) => c.filter != "");
-    let res: PageResult = await invoke("select_page", { selected, filteredColumns, sortColumn });
+    let res: PageResult = await invoke("select_page", { selected, pageSize, filteredColumns, sortColumn });
     console.log(res);
     setCurrentPage(res.page_num);
     setEvents(res.events);
@@ -77,7 +84,7 @@ function App() {
     newColumns[columnName] = newCol;
     console.log(newColumns[columnName]);
     setColumns(newColumns);
-    getPage(1, newColumns);
+    getPage(1, pageSize, newColumns);
   }
 
 
@@ -95,6 +102,13 @@ function App() {
             columns={columns} 
             setFilter={setFilter} 
             setSortColumn={setSortColumn}
+            getPage={getPage}
+            pageSize={pageSize}
+          />
+          <PageSizeSelector 
+            pageSizes={PAGE_SIZES}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
             getPage={getPage}
           />
           <Paginator

@@ -56,8 +56,7 @@ println!("{filtered_columns:?}");
 
 
 #[tauri::command]
-async fn select_page(selected: usize, filtered_columns:Vec<Column>, sort_column: Option<Column>, state: State<'_, AppState>) -> Result<PageResult, ()> {
-    let page_size = *state.page_size.lock().unwrap();
+async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Column>, sort_column: Option<Column>, state: State<'_, AppState>) -> Result<PageResult, ()> {
     let mut events = state.events.lock().unwrap();
     // We sort the events inplace if there's a sort column
     if let Some(c) = sort_column {
@@ -87,7 +86,10 @@ async fn select_page(selected: usize, filtered_columns:Vec<Column>, sort_column:
         0 => events.to_vec(),
         _ => {filter_events(events.to_vec(), filtered_columns)}
     }; 
-    let start_idx = (selected - 1) * page_size;
+    let start_idx = match (selected - 1) * page_size >= filtered_events.len() {
+        true => 0,
+        false => (selected - 1) * page_size
+    };
     let end_idx = min(start_idx + page_size, filtered_events.len());
     let res = PageResult {
         events: filtered_events[start_idx..end_idx].to_vec(),
