@@ -31,6 +31,7 @@ struct Column {
     filter: String
 }
 
+
 ///
 /// To minimize data processing, we will only convert the single page of results into 
 /// `serde_json` Objeccts on demand.
@@ -52,34 +53,36 @@ println!("{filtered_columns:?}");
     .collect()
 
 }
-///
-/// Sorts the Page by a given column before passing back.
-/// 
-/// This is nested with [[filter_events]]
-/// 
-fn sort_events(page:Vec<Event>, sort_column:Column) -> Vec<Event> {
-    let mut sorted = page.clone();
-    sorted.sort_by(|a, b| {
-        if let Some(a_val) = a.get(&sort_column.name) {
-            match b.get(&sort_column.name) {
+
+
+#[tauri::command]
+async fn select_page(selected: usize, filtered_columns:Vec<Column>, sort_column: Option<Column>, state: State<'_, AppState>) -> Result<PageResult, ()> {
+    let page_size = *state.page_size.lock().unwrap();
+    let mut events = state.events.lock().unwrap();
+    // We sort the events inplace if there's a sort column
+    if let Some(c) = sort_column {
+        events.sort_by(|a, b| {
+        if let Some(a_val) = a.get(&c.name) {
+            match b.get(&c.name) {
                 Some(b_val) => {
-                    let a_str = a_val.as_str().unwrap();
-                    let b_str = b_val.as_str().unwrap();
-                    return a_str.cmp(b_str);
+                    match a_val {
+                        Value::String(s) => {
+                            return s.as_str().cmp(b_val.as_str().unwrap());
+                        },
+                        Value::Number(n) => {
+                            return n.as_u64().unwrap().cmp(&b_val.as_u64().unwrap());
+                        }
+                        _ => { 
+                            return std::cmp::Ordering::Equal; 
+                        }
+                    }
                 },
                 None => { return std::cmp::Ordering::Equal; }
             }
         }
         std::cmp::Ordering::Equal
-    });
-    sorted
-}
-
-
-#[tauri::command]
-async fn select_page(selected: usize, filtered_columns:Vec<Column>, state: State<'_, AppState>) -> Result<PageResult, ()> {
-    let page_size = *state.page_size.lock().unwrap();
-    let events = state.events.lock().unwrap();
+        });
+    }
     let filtered_events = match filtered_columns.len() {
         0 => events.to_vec(),
         _ => {filter_events(events.to_vec(), filtered_columns)}

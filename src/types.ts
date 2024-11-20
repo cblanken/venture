@@ -11,7 +11,9 @@ export interface Column {
   filter: string
 }
 
-export type ColumnMap = Record<string, Column>
+export type ColumnMap = Record<string, Column>;
+
+export type SortColumn = Column | null;
 
 // export enum FilterType {
 //   Match,

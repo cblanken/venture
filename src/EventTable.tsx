@@ -5,10 +5,18 @@ import FilterModal from "./FilterModal";
 interface ComponentProps {
     events: Object[],
     columns: ColumnMap,
-    setFilter: Function
+    setFilter: Function,
+    setSortColumn: Function,
+    getPage: Function
 }
 
-const EventTable = ({ events, columns, setFilter }: ComponentProps): JSX.Element => {
+const EventTable = ({ 
+    events, 
+    columns, 
+    setFilter, 
+    setSortColumn, 
+    getPage 
+}: ComponentProps): JSX.Element => {
 
     const selectedColumns = Object.values(columns) 
         .filter((c: Column) => c.selected)
@@ -27,7 +35,13 @@ const EventTable = ({ events, columns, setFilter }: ComponentProps): JSX.Element
                     <tr>
                         <td>Detail View</td>
                         {selectedColumns.map((c: Column, i: number) =>
-                            <td key={`col-${i}`}>
+                            <td 
+                                key={`col-${i}`}
+                                onClick={() => {
+                                    setSortColumn(c);
+                                    getPage(1, selectedColumns);
+                                }}
+                            >
                                 {c.name}
                                 <FilterModal column={c} setFilter={setFilter} />
                             </td>
