@@ -5,26 +5,43 @@ interface ComponentProps {
     pageSize: number
 }
 
-const Paginator = ({ getPage, currentPage, totalEvents, pageSize }: ComponentProps) => (
-    <div className="paginator">
-        <p>
-            <button
-                className="paginate prev"
-                disabled={currentPage == 1}
-                onClick={() => getPage(currentPage - 1, null)}
-            >
-                &lt;
-            </button>
-            Page {currentPage} of {Math.ceil(totalEvents / pageSize)}
-            <button
-                className="paginate next"
-                disabled={currentPage === (Math.ceil(totalEvents / pageSize))}
-                onClick={() => getPage(currentPage + 1, null)}
-            >
-                &gt;
-            </button>
-        </p>
-    </div>
-)
+const Paginator = ({ getPage, currentPage, totalEvents, pageSize }: ComponentProps) => {
+    const lastPage = Math.ceil(totalEvents/pageSize);
+    return (
+        <div className="paginator">
+            <p>
+                <button
+                    className="paginate first"
+                    disabled={currentPage == 1}
+                    onClick={() => getPage(1, pageSize, null)}
+                >
+                    &lt;&lt;
+                </button>
+                <button
+                    className="paginate prev"
+                    disabled={currentPage == 1}
+                    onClick={() => getPage(currentPage - 1, pageSize, null)}
+                >
+                    &lt;
+                </button>
+                Page {currentPage} of {lastPage}
+                <button
+                    className="paginate next"
+                    disabled={currentPage === lastPage}
+                    onClick={() => getPage(currentPage + 1, null)}
+                >
+                    &gt;
+                </button>
+                <button
+                    className="paginate last"
+                    disabled={currentPage === lastPage}
+                    onClick={() => getPage(lastPage, pageSize, null)}
+                >
+                    &gt;&gt;
+                </button>
+            </p>
+        </div>
+    )
+} 
 
 export default Paginator;
