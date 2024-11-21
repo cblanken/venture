@@ -12,7 +12,7 @@ type Event = Map<String, Value>;
 #[derive(Default)]
 struct AppState {
     events: Mutex<Vec<Event>>,
-    page_size: Mutex<usize>,
+    sort_column: Mutex<Option<Column>>
 }
 
 #[derive(Default, Debug, Serialize)]
@@ -24,7 +24,7 @@ struct PageResult {
 }
 
 
-#[derive(Default, Debug, Deserialize)]
+#[derive(Clone, Default, Debug, Deserialize)]
 struct Column {
     name: String,
     selected: bool,
@@ -59,7 +59,7 @@ println!("{filtered_columns:?}");
 async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Column>, sort_column: Option<Column>, state: State<'_, AppState>) -> Result<PageResult, ()> {
     let mut events = state.events.lock().unwrap();
     // We sort the events inplace if there's a sort column
-    if let Some(c) = sort_column {
+    if let Some(c) = &sort_column {
         events.sort_by(|a, b| {
         if let Some(a_val) = a.get(&c.name) {
             match b.get(&c.name) {
@@ -82,10 +82,29 @@ async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Col
         std::cmp::Ordering::Equal
         });
     }
-    let filtered_events = match filtered_columns.len() {
+    let mut filtered_events = match filtered_columns.len() {
         0 => events.to_vec(),
         _ => {filter_events(events.to_vec(), filtered_columns)}
     }; 
+    // Reverse the order if the sort column is the same as it was.
+    if let Some(incoming_column) = &sort_column {
+        println!("Incoming sort column: {sort_column:?}");
+        match state.sort_column.lock() {
+            Ok(current_column) => { 
+                if let Some(c) = current_column.clone() {
+                    if c.name == incoming_column.name {
+                        println!("Matching sort column: {c:?}");
+                        filtered_events.reverse();
+                    }
+                }
+                drop(current_column);
+            },
+            Err(e) => {println!("{e:?}")} 
+        }
+        // No matter what, we set the column to what's incoming 
+        state.sort_column.lock().unwrap().clone_from(&sort_column);
+    }
+
     let start_idx = match (selected - 1) * page_size >= filtered_events.len() {
         true => 0,
         false => (selected - 1) * page_size
@@ -148,7 +167,7 @@ pub fn run() {
         .setup(|app| {
             app.manage(AppState {
                 events: Mutex::new(vec![]),
-                page_size: Mutex::new(DEFAULT_PAGE_SIZE),
+                sort_column: Mutex::new(None)
             });
             Ok(())
         })
