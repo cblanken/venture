@@ -5,16 +5,46 @@ use std::cmp::min;
 use std::sync::Mutex;
 use tauri::{Builder, Manager, State};
 
+
+///
+/// We gotta choose _something_ to give them by default.:w
+/// 
 const DEFAULT_PAGE_SIZE: usize = 10;
 
+///
+/// Alias for an individual event Object.
+/// 
 type Event = Map<String, Value>;
 
+///
+/// The possible sort directions.
+/// Could this be 0/1? Yes, and probably
+/// is once compiled. But I'm gonna use my
+/// rich type system, tyvm.
+/// 
+#[derive(Debug, Deserialize)]
+enum SortDirection {
+    ASC,
+    DESC
+}
+
+///
+/// What the backend needs to keep track of, aka
+/// the loaded events.
+/// 
 #[derive(Default)]
 struct AppState {
     events: Mutex<Vec<Event>>,
-    sort_column: Mutex<Option<Column>>
 }
 
+
+///
+/// What gets passed back to the frontend
+/// after loading events. The `page_size` isn't
+/// strictly necessary as the frontend tracks that,
+/// but it's a solid confirmation that the two are
+/// aligned.
+/// 
 #[derive(Default, Debug, Serialize)]
 struct PageResult {
     events: Vec<Event>,
@@ -23,8 +53,22 @@ struct PageResult {
     total_events: usize,
 }
 
+///
+/// The container for sorting info.
+/// 
+#[derive(Debug, Deserialize)]
+struct SortBy {
+    column: Column,
+    direction: SortDirection
+}
 
-#[derive(Clone, Default, Debug, Deserialize)]
+///
+/// Necessary for handling filtering and
+/// sorting. The `selected` value, while not used,
+/// is for parity with the JS representation of the
+/// type.
+/// 
+#[derive(Default, Debug, Deserialize)]
 struct Column {
     name: String,
     selected: bool,
@@ -56,7 +100,7 @@ println!("{filtered_columns:?}");
 
 
 #[tauri::command]
-async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Column>, sort_column: Option<Column>, state: State<'_, AppState>) -> Result<PageResult, ()> {
+async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Column>, sort_by: Option<SortBy>, state: State<'_, AppState>) -> Result<PageResult, ()> {
     let mut events = state.events.lock().unwrap();
     // We sort the events inplace if there's a sort column
     if let Some(c) = &sort_column {
@@ -82,28 +126,11 @@ async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Col
         std::cmp::Ordering::Equal
         });
     }
+
     let mut filtered_events = match filtered_columns.len() {
         0 => events.to_vec(),
         _ => {filter_events(events.to_vec(), filtered_columns)}
     }; 
-    // Reverse the order if the sort column is the same as it was.
-    if let Some(incoming_column) = &sort_column {
-        println!("Incoming sort column: {sort_column:?}");
-        match state.sort_column.lock() {
-            Ok(current_column) => { 
-                if let Some(c) = current_column.clone() {
-                    if c.name == incoming_column.name {
-                        println!("Matching sort column: {c:?}");
-                        filtered_events.reverse();
-                    }
-                }
-                drop(current_column);
-            },
-            Err(e) => {println!("{e:?}")} 
-        }
-        // No matter what, we set the column to what's incoming 
-        state.sort_column.lock().unwrap().clone_from(&sort_column);
-    }
 
     let start_idx = match (selected - 1) * page_size >= filtered_events.len() {
         true => 0,
@@ -166,8 +193,7 @@ pub fn run() {
     Builder::default()
         .setup(|app| {
             app.manage(AppState {
-                events: Mutex::new(vec![]),
-                sort_column: Mutex::new(None)
+                events: Mutex::new(vec![])
             });
             Ok(())
         })
