@@ -1,6 +1,11 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { PageResult, ColumnMap, Column, SortColumn } from "./types";
+import { 
+  PageResult, 
+  ColumnMap, 
+  Column,
+  SortBy,
+} from "./types";
 import { homeDir } from '@tauri-apps/api/path';
 import { open } from "@tauri-apps/plugin-dialog";
 import ColumnSelector from "./ColumnSelector";
@@ -23,7 +28,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [events, setEvents]: [Object[], Function] = useState([]);
   const [columns, setColumns]: [ColumnMap, Function] = useState({});
-  const [sortColumn, setSortColumn]: [SortColumn, Function] = useState(null);
+  const [sortBy, setSortBy]: [SortBy | null, Function] = useState(null);
   const [totalEvents, setTotalEvents]: [number, Function] = useState(0);
   const [pageSize, setPageSize]: [number, Function] = useState(DEFAULT_PAGE_SIZE);
 
@@ -32,7 +37,7 @@ function App() {
     console.log(pageSize);
     let filteredColumns = Object.values(cols)
       .filter((c: Column) => c.filter != "");
-    let res: PageResult = await invoke("select_page", { selected, pageSize, filteredColumns, sortColumn });
+    let res: PageResult = await invoke("select_page", { selected, pageSize, filteredColumns, sortBy });
     console.log(res);
     setCurrentPage(res.page_num);
     setEvents(res.events);
@@ -101,7 +106,8 @@ function App() {
             events={events} 
             columns={columns} 
             setFilter={setFilter} 
-            setSortColumn={setSortColumn}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
             getPage={getPage}
             pageSize={pageSize}
           />

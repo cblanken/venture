@@ -17,18 +17,6 @@ const DEFAULT_PAGE_SIZE: usize = 10;
 type Event = Map<String, Value>;
 
 ///
-/// The possible sort directions.
-/// Could this be 0/1? Yes, and probably
-/// is once compiled. But I'm gonna use my
-/// rich type system, tyvm.
-/// 
-#[derive(Debug, Deserialize)]
-enum SortDirection {
-    ASC,
-    DESC
-}
-
-///
 /// What the backend needs to keep track of, aka
 /// the loaded events.
 /// 
@@ -59,7 +47,7 @@ struct PageResult {
 #[derive(Debug, Deserialize)]
 struct SortBy {
     column: Column,
-    direction: SortDirection
+    ascending: bool
 }
 
 ///
@@ -103,7 +91,8 @@ println!("{filtered_columns:?}");
 async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Column>, sort_by: Option<SortBy>, state: State<'_, AppState>) -> Result<PageResult, ()> {
     let mut events = state.events.lock().unwrap();
     // We sort the events inplace if there's a sort column
-    if let Some(c) = &sort_column {
+    if let Some(sb) = &sort_by {
+        let c = &sb.column;
         events.sort_by(|a, b| {
         if let Some(a_val) = a.get(&c.name) {
             match b.get(&c.name) {
@@ -125,12 +114,19 @@ async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Col
         }
         std::cmp::Ordering::Equal
         });
+
+        // Now, if the `sort_by` was descending, flip it.
+        if !sb.ascending {
+            events.reverse();
+        }
+
     }
 
     let mut filtered_events = match filtered_columns.len() {
         0 => events.to_vec(),
         _ => {filter_events(events.to_vec(), filtered_columns)}
     }; 
+
 
     let start_idx = match (selected - 1) * page_size >= filtered_events.len() {
         true => 0,

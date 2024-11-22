@@ -11,14 +11,10 @@ export interface Column {
   filter: string
 }
 
-export enum SortDirection {
-  ASC,
-  DESC
-}
 
 export interface SortBy {
   column: Column,
-  direction: SortDirection
+  ascending: boolean
 }
 
 export type ColumnMap = Record<string, Column>;

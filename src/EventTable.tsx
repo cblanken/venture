@@ -1,12 +1,13 @@
 import EventDetail from "./EventDetail";
-import { Column, ColumnMap } from "./types";
+import { Column, ColumnMap, SortBy } from "./types";
 import FilterModal from "./FilterModal";
 
 interface ComponentProps {
     events: Object[],
     columns: ColumnMap,
     setFilter: Function,
-    setSortColumn: Function,
+    sortBy: SortBy | null,
+    setSortBy: Function,
     getPage: Function,
     pageSize: number
 }
@@ -14,8 +15,9 @@ interface ComponentProps {
 const EventTable = ({ 
     events, 
     columns, 
-    setFilter, 
-    setSortColumn, 
+    setFilter,
+    sortBy,
+    setSortBy, 
     getPage,
     pageSize 
 }: ComponentProps): JSX.Element => {
@@ -29,6 +31,10 @@ const EventTable = ({
         target.querySelector("dialog")?.showModal();
     }
 
+    // If the sortBy is null, default to ascending.
+    // Otherwise, make it the opposite of whatever is set currently.
+    const ascending = sortBy === null ? true : !sortBy.ascending;
+
     return (
         <>
             <h2>Loaded Events</h2>
@@ -40,7 +46,10 @@ const EventTable = ({
                             <td 
                                 key={`col-${i}`}
                                 onClick={() => {
-                                    setSortColumn(c);
+                                    setSortBy({
+                                        column: c,
+                                        ascending 
+                                    });
                                     getPage(1, pageSize, selectedColumns);
                                 }}
                             >
