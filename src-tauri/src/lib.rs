@@ -75,9 +75,32 @@ println!("{filtered_columns:?}");
     .filter(|e| {
         for c in &filtered_columns {
             if e.contains_key(&c.name) {
-                if let Some(val) = e[&c.name].as_str() {
-                    return c.filter.contains(val);
+
+                // We need to check the value's type.
+                let val = &e[&c.name];
+                match val {
+                    serde_json::Value::Number(n) => {
+                        // int or float?
+                        // Check int first because it could fail
+                        if let Some(i) = n.as_i64() {
+                            return i == c.filter.parse::<i64>().unwrap();
+                        }
+                        if let Some(f) = n.as_f64() {
+                            return f == c.filter.parse::<f64>().unwrap();
+                        }
+                        return false;
+                    },
+                    serde_json::Value::String(s) => {
+                        return s == &c.filter;
+                    }
+                    _ => { return false; }
                 }
+
+                // if let Some(val) = e[&c.name] {
+
+                    
+                //     return c.filter.contains(val);
+                // }
             }
         }   
         false
@@ -194,8 +217,6 @@ async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageR
                } 
             };
 
-
-            // Remove Objects before returning
             e
         })
         .collect();
