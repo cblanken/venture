@@ -122,7 +122,7 @@ async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Col
 
     }
 
-    let mut filtered_events = match filtered_columns.len() {
+    let filtered_events = match filtered_columns.len() {
         0 => events.to_vec(),
         _ => {filter_events(events.to_vec(), filtered_columns)}
     }; 
@@ -170,6 +170,32 @@ async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageR
                 );
             }
 
+            // Process #attributes objects
+            // Why is this a for loop inside a map?
+            // It feels more semantic because it's an iterative process
+            // more than a wholesale transformation.
+            for (k, v) in e.clone() {
+               if v.is_object() {
+                let v_obj: &Map<String, Value> = v.as_object().unwrap();
+                if v_obj.contains_key("#attributes") {
+                   let v_attrs = v_obj.get("#attributes")
+                    .unwrap()
+                    .as_object()
+                    .unwrap();
+
+                   for (attr, val) in v_attrs {
+                    let new_key = format!("{k}.{attr}");
+                    e.insert(new_key, val.clone());
+                   }
+                   // Remove original #attributes key
+                   e.remove(&k);
+                }
+
+               } 
+            };
+
+
+            // Remove Objects before returning
             e
         })
         .collect();
