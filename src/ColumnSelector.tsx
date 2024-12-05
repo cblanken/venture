@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Column, ColumnMap } from "./types";
 
 interface ComponentProps {

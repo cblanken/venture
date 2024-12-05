@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { Column } from "./types";
 
 interface ComponentProps {
@@ -25,7 +25,7 @@ export default function FilterModal({column, setFilter}: ComponentProps) {
 
     const updateFilter = (e:any) => {
         let target: HTMLInputElement = e.target;
-        setFilterInput(e.target.value);
+        setFilterInput(target.value);
     }
 
     return (
