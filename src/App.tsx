@@ -8,6 +8,7 @@ import {
 } from "./types";
 import { homeDir } from '@tauri-apps/api/path';
 import { open } from "@tauri-apps/plugin-dialog";
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import ColumnSelector from "./ColumnSelector";
 import CurrentFilters from "./CurrentFilters";
 import EventTable from "./EventTable";
@@ -96,7 +97,10 @@ function App() {
   return (
     <main className="container">
       <h1>Venture</h1>
-      <button type="button" onClick={async () =>{await getFile()}}>Open</button>
+      <nav className="button-container">
+        <button type="button" onClick={async () =>{await getFile()}}>Open</button>
+        <button type="button" onClick={ async () => {await getCurrentWindow().close();} }>Quit</button>
+      </nav>
       {
         events.length > 0 ?
         <>
@@ -124,7 +128,7 @@ function App() {
             totalEvents={totalEvents}
           />
         </>
-        : null
+        : <h2>Open a <code>.evtx</code> file to begin.</h2>
       }
     </main>
   );
