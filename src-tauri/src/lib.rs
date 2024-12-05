@@ -96,11 +96,6 @@ println!("{filtered_columns:?}");
                     _ => { return false; }
                 }
 
-                // if let Some(val) = e[&c.name] {
-
-                    
-                //     return c.filter.contains(val);
-                // }
             }
         }   
         false
