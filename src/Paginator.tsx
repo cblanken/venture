@@ -28,7 +28,7 @@ const Paginator = ({ getPage, currentPage, totalEvents, pageSize }: ComponentPro
                 <button
                     className="paginate next"
                     disabled={currentPage === lastPage}
-                    onClick={() => getPage(currentPage + 1, null)}
+                    onClick={() => getPage(currentPage + 1, pageSize, null)}
                 >
                     &gt;
                 </button>
