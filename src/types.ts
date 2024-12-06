@@ -1,5 +1,6 @@
 export interface PageResult {
   events: string[],
+  column_names: string[],
   page_num: number,
   page_size: number,
   total_events: number
@@ -20,6 +21,15 @@ export interface SortBy {
 export type ColumnMap = Record<string, Column>;
 
 export type SortColumn = Column | null;
+
+// The different states of the app
+export enum AppPhase {
+  INIT, // First open
+  FILE_LOADING, // When loading file
+  FILE_LOADED, // Initial load, no filters
+  PAGE_LOADING, // Getting a new page
+  PAGE_LOADED, // Page loaded
+}
 
 // export enum FilterType {
 //   Match,

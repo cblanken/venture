@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { 
+  AppPhase,
   PageResult, 
   ColumnMap, 
   Column,
@@ -26,6 +27,7 @@ const PAGE_SIZES = [
 
 function App() {
   // const [selectedFile, setSelectedFile] = useState("");
+  const [appPhase, setAppPhase]: [AppPhase, Function] = useState(AppPhase.INIT);
   const [currentPage, setCurrentPage] = useState(1);
   const [events, setEvents]: [Object[], Function] = useState([]);
   const [columns, setColumns]: [ColumnMap, Function] = useState({});
@@ -35,14 +37,15 @@ function App() {
 
   async function getPage(selected: number, pageSize: number, newColumns: {[key: string]: Column} | null) {
     let cols = newColumns || columns; 
-    console.log(pageSize);
     let filteredColumns = Object.values(cols)
       .filter((c: Column) => c.filter != "");
+    setAppPhase(AppPhase.PAGE_LOADING);
     let res: PageResult = await invoke("select_page", { selected, pageSize, filteredColumns, sortBy });
     console.log(res);
     setCurrentPage(res.page_num);
     setEvents(res.events);
     setTotalEvents(res.total_events);
+    setAppPhase(AppPhase.PAGE_LOADED);
   }
 
   async function getFile() {
@@ -57,10 +60,14 @@ function App() {
       }]
     });
 
+    setAppPhase(AppPhase.FILE_LOADING);
+
     let res: PageResult = await invoke("load_evtx", { selected });
     let events: Object[] = await res.events;
     let columns: ColumnMap = {}; 
-    Object.keys(events[0]).forEach((c: string) => {
+
+    // Transform the column names into proper Columns
+    res.column_names.forEach((c: string) => {
       columns[c] = { 
         name: c,
         selected: true,
@@ -68,13 +75,13 @@ function App() {
       }
     });
 
-    console.log(events);
-
     setCurrentPage(res.page_num);
     setTotalEvents(res.total_events);
     setPageSize(res.page_size);
     setEvents(events);
     setColumns(columns);
+
+    setAppPhase(AppPhase.FILE_LOADED);
   }
 
   const setFilter = (columnName: string, filter: string) => {
@@ -94,6 +101,44 @@ function App() {
   }
 
 
+  const UiPhase = () => {
+    switch(Number(appPhase)) {
+      case AppPhase.INIT:
+        return  <h2>Open a <code>.evtx</code> file to begin.</h2>;
+      case AppPhase.FILE_LOADING:
+        return <h2>Loading...</h2>
+      default:
+        return (
+          <>
+            <ColumnSelector columns={columns} setColumns={setColumns} />
+            <CurrentFilters columns={columns} setFilter={setFilter} />
+            <EventTable 
+              events={events} 
+              columns={columns} 
+              setFilter={setFilter} 
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              getPage={getPage}
+              pageSize={pageSize}
+            />
+            <PageSizeSelector 
+              pageSizes={PAGE_SIZES}
+              pageSize={pageSize}
+              setPageSize={setPageSize}
+              getPage={getPage}
+            />
+            <Paginator
+              currentPage={currentPage}
+              pageSize={pageSize}
+              getPage={getPage}
+              totalEvents={totalEvents}
+            />
+          </>
+        );
+    }
+  }
+  
+
   return (
     <main className="container">
       <h1>Venture</h1>
@@ -102,33 +147,7 @@ function App() {
         <button type="button" onClick={ async () => {await getCurrentWindow().close();} }>Quit</button>
       </nav>
       {
-        events.length > 0 ?
-        <>
-          <ColumnSelector columns={columns} setColumns={setColumns} />
-          <CurrentFilters columns={columns} setFilter={setFilter} />
-          <EventTable 
-            events={events} 
-            columns={columns} 
-            setFilter={setFilter} 
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            getPage={getPage}
-            pageSize={pageSize}
-          />
-          <PageSizeSelector 
-            pageSizes={PAGE_SIZES}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-            getPage={getPage}
-          />
-          <Paginator
-            currentPage={currentPage}
-            pageSize={pageSize}
-            getPage={getPage}
-            totalEvents={totalEvents}
-          />
-        </>
-        : <h2>Open a <code>.evtx</code> file to begin.</h2>
+        UiPhase()
       }
     </main>
   );
