@@ -71,37 +71,40 @@ struct Column {
 /// To minimize data processing, we will only convert the single page of results into 
 /// `serde_json` Objeccts on demand.
 /// 
-fn filter_events(page:Vec<Event>, filtered_columns: Vec<Column>) -> Vec<Event> {
+fn filter_events(events:Vec<Event>, filtered_columns: Vec<Column>) -> Vec<Event> {
 println!("{filtered_columns:?}");
- page
+ events
     .into_iter()
-    .filter(|e| {
-        for c in &filtered_columns {
-            if e.contains_key(&c.name) {
-
-                // We need to check the value's type.
-                let val = &e[&c.name];
-                match val {
-                    serde_json::Value::Number(n) => {
-                        // int or float?
-                        // Check int first because it could fail
-                        if let Some(i) = n.as_i64() {
-                            return i == c.filter.parse::<i64>().unwrap();
+    .filter(|event| {
+        filtered_columns
+            .iter()
+            .all(|c| {
+                if event.contains_key(&c.name) {
+                    // We need to check the value's type.
+                    let val = &event[&c.name];
+                    match val {
+                        serde_json::Value::Number(n) => {
+                            // int or float?
+                            // Check int first because it could fail
+                            if let Some(i) = n.as_i64() {
+                                return i == c.filter.parse::<i64>().unwrap()
+                            }
+                            if let Some(f) = n.as_f64() {
+                                return f != c.filter.parse::<f64>().unwrap()
+                            }
+                            return false;
+                        },
+                        serde_json::Value::String(s) => {
+                            // Normalize to lowercase and search for anything that
+                            // contains the string, not exact matches
+                            return s.to_lowercase().contains(&c.filter.to_lowercase())
                         }
-                        if let Some(f) = n.as_f64() {
-                            return f == c.filter.parse::<f64>().unwrap();
-                        }
-                        return false;
-                    },
-                    serde_json::Value::String(s) => {
-                        return s == &c.filter;
+                        _ => { return false; }
                     }
-                    _ => { return false; }
                 }
-
-            }
-        }   
-        false
+                // If the Event doesn't have the column, drop it
+                return false;
+            })
     })
     .collect()
 
@@ -162,6 +165,7 @@ async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Col
         total_events: filtered_events.len(),
     };
     drop(events);
+    println!("Returning {page_size} of {}", filtered_events.len());
     Ok(res)
 }
 
@@ -242,6 +246,7 @@ async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageR
     // column names
     state.events.lock().unwrap().clone_from(&events);
     state.column_names.lock().unwrap().clone_from(&column_names);
+    println!("Returning {page_size} of {}", events.len());
     Ok(PageResult {
         events: events[0..page_size].to_vec(),
         column_names: Some(column_names),
