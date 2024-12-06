@@ -23,6 +23,7 @@ type Event = Map<String, Value>;
 #[derive(Default)]
 struct AppState {
     events: Mutex<Vec<Event>>,
+    column_names: Mutex<Vec<String>>
 }
 
 
@@ -36,6 +37,8 @@ struct AppState {
 #[derive(Default, Debug, Serialize)]
 struct PageResult {
     events: Vec<Event>,
+    // Option because we only send with the file load
+    column_names: Option<Vec<String>>,
     page_num: usize,
     page_size: usize,
     total_events: usize,
@@ -153,6 +156,7 @@ async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Col
     let end_idx = min(start_idx + page_size, filtered_events.len());
     let res = PageResult {
         events: filtered_events[start_idx..end_idx].to_vec(),
+        column_names: None,
         page_num: selected,
         page_size,
         total_events: filtered_events.len(),
@@ -174,6 +178,7 @@ async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageR
                 .as_object_mut()
                 .unwrap()
                 .to_owned();
+
             let mut e: Event = data["System"]
                 .clone()
                 .as_object_mut()
@@ -217,9 +222,29 @@ async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageR
         .collect();
     // This is needed for lil baby evtx files.
     let page_size = min(events.len(), DEFAULT_PAGE_SIZE);
+
+    // Here we will collect all columns (keys)
+    // From the events to make sure nothing's missed
+    // This is a heavy step, but one that can't really
+    // be missed since some events have unique columns,
+    // and because we're paginating, we need all the
+    // known columns up front.
+    let mut column_names: Vec<String> = Vec::new();
+    for event in events.clone() {
+        let mut new_columns: Vec<String> = event.keys()
+            .filter(|&k| !column_names.contains(k))
+            .map(|k| k.to_owned())
+            .collect();
+        column_names.append(&mut new_columns);
+    }
+
+    // Set our state after processing data from events and
+    // column names
     state.events.lock().unwrap().clone_from(&events);
+    state.column_names.lock().unwrap().clone_from(&column_names);
     Ok(PageResult {
         events: events[0..page_size].to_vec(),
+        column_names: Some(column_names),
         page_num: 1,
         page_size,
         total_events: events.len(),
@@ -231,7 +256,8 @@ pub fn run() {
     Builder::default()
         .setup(|app| {
             app.manage(AppState {
-                events: Mutex::new(vec![])
+                events: Mutex::new(vec![]),
+                column_names: Mutex::new(vec![])
             });
             Ok(())
         })
