@@ -1,6 +1,6 @@
 import hljs from "highlight.js";
 import { useEffect } from "react";
-import "highlight.js/styles/github.css";
+import "highlight.js/styles/atom-one-dark.css";
 
 
 interface ComponentProps {
