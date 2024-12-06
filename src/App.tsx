@@ -137,6 +137,12 @@ function App() {
         );
     }
   }
+
+  const openColumnSelector = () => {
+    const columnSelector = document.querySelector(".column-selector") as HTMLDialogElement;
+    columnSelector.showModal();
+
+  }
   
 
   return (
@@ -144,6 +150,10 @@ function App() {
       <h1>Venture</h1>
       <nav className="button-container">
         <button type="button" onClick={async () =>{await getFile()}}>Open</button>
+        { Number(appPhase) == AppPhase.FILE_LOADED || Number(appPhase) == AppPhase.PAGE_LOADED ?
+          <button onClick={openColumnSelector}>Select Columns</button>
+          : null
+        }
         <button type="button" onClick={ async () => {await getCurrentWindow().close();} }>Quit</button>
       </nav>
       {
