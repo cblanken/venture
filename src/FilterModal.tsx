@@ -38,7 +38,8 @@ export default function FilterModal({column, setFilter}: ComponentProps) {
                         e.preventDefault();
                         let target: HTMLFormElement | null = e.target;
                         let input = target?.querySelector("input");
-                        setFilter(column.name, input?.value)
+                        setFilter(column.name, input?.value);
+                        closeDialog(e);
                     }}
                 >
                     <label>Match Pattern:</label>
@@ -49,7 +50,7 @@ export default function FilterModal({column, setFilter}: ComponentProps) {
                     />
                     <button type="submit">Set Filter</button>
                 </form>
-                <button type="button" onClick={closeDialog}>Close</button> 
+                <button type="button" id="filter-modal-btn-close" onClick={closeDialog}>Close</button> 
             </dialog>
         </>
     )
