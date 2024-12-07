@@ -165,7 +165,6 @@ async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Col
         total_events: filtered_events.len(),
     };
     drop(events);
-    println!("Returning {page_size} of {}", filtered_events.len());
     Ok(res)
 }
 
@@ -246,7 +245,6 @@ async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageR
     // column names
     state.events.lock().unwrap().clone_from(&events);
     state.column_names.lock().unwrap().clone_from(&column_names);
-    println!("Returning {page_size} of {}", events.len());
     Ok(PageResult {
         events: events[0..page_size].to_vec(),
         column_names: Some(column_names),
