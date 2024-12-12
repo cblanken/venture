@@ -220,6 +220,9 @@ async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageR
                } 
             };
 
+            // Inject the "Flagged" Column
+            e.insert("Flagged".to_string(), serde_json::Value::Bool(false));
+
             e
         })
         .collect();
@@ -254,6 +257,31 @@ async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageR
     })
 }
 
+#[tauri::command]
+async fn flag_event(event_id: u64, state: State<'_, AppState>) -> Result<(),()> {
+
+    println!("Flag Request: {event_id}");
+    let mut events = state.events.lock().unwrap();
+    
+    let new_events = events
+    .iter_mut()
+    .map(|e| {
+        let record_id = e.get("EventRecordID").unwrap().as_u64().unwrap();
+        if record_id == event_id {
+            println!("Found {record_id}");
+            let flag_state = e.get("Flagged").unwrap().as_bool().unwrap();
+            e.insert("Flagged".to_string(), serde_json::Value::Bool(!flag_state));
+        }
+        e.to_owned()
+    })
+    .collect::<Vec<Map<String, Value>>>();
+
+    drop(events);
+    state.events.lock().unwrap().clone_from(&new_events);
+
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     Builder::default()
@@ -267,7 +295,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![load_evtx, select_page])
+        .invoke_handler(tauri::generate_handler![load_evtx, select_page, flag_event])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

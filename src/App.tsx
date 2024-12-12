@@ -6,6 +6,7 @@ import {
   ColumnMap, 
   Column,
   SortBy,
+  Event
 } from "./types";
 import { homeDir } from '@tauri-apps/api/path';
 import { open } from "@tauri-apps/plugin-dialog";
@@ -29,7 +30,7 @@ function App() {
   // const [selectedFile, setSelectedFile] = useState("");
   const [appPhase, setAppPhase]: [AppPhase, Function] = useState(AppPhase.INIT);
   const [currentPage, setCurrentPage] = useState(1);
-  const [events, setEvents]: [Object[], Function] = useState([]);
+  const [events, setEvents]: [Event[], Function] = useState([]);
   const [columns, setColumns]: [ColumnMap, Function] = useState({});
   const [sortBy, setSortBy]: [SortBy | null, Function] = useState(null);
   const [totalEvents, setTotalEvents]: [number, Function] = useState(0);
@@ -46,6 +47,18 @@ function App() {
     setEvents(res.events);
     setTotalEvents(res.total_events);
     setAppPhase(AppPhase.PAGE_LOADED);
+  }
+
+  function flagEvent(eventId: number) {
+    console.log(eventId);
+    let event = events.find((e: Event) => (e.EventRecordID === eventId));
+    if (event) {
+      // Modify it here on the loaded page. The backend will be handled
+      // by the invoke
+      event.Flagged = !event.Flagged
+      invoke("flag_event", { eventId });
+
+    }
   }
 
   async function getFile() {
@@ -120,6 +133,7 @@ function App() {
               setSortBy={setSortBy}
               getPage={getPage}
               pageSize={pageSize}
+              flagEvent={flagEvent}
             />
             <PageSizeSelector 
               pageSizes={PAGE_SIZES}

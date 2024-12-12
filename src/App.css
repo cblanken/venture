@@ -165,8 +165,12 @@ table {
 
   
   dialog {
-    color: light-dark(--main-color, --main-background-color);
+    color: light-dark(var(--main-color), var(--main-background-color));
     background: light-dark(#313131, #cecece);
+  }
+
+  h3 {
+    color: light-dark(var(--main-color), var(--main-background-color));
   }
 }
 dialog pre {

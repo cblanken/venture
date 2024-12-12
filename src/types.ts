@@ -12,6 +12,11 @@ export interface Column {
   filter: string
 }
 
+export interface Event extends Object {
+  EventRecordID: number,
+  Flagged: boolean
+}
+
 
 export interface SortBy {
   column: Column,

@@ -1,6 +1,7 @@
 import EventDetail from "./EventDetail";
-import { Column, ColumnMap, SortBy } from "./types";
+import { Column, ColumnMap, SortBy, Event} from "./types";
 import FilterModal from "./FilterModal";
+import FlagBox from "./FlagBox";
 
 interface ComponentProps {
     events: Object[],
@@ -9,7 +10,8 @@ interface ComponentProps {
     sortBy: SortBy | null,
     setSortBy: Function,
     getPage: Function,
-    pageSize: number
+    pageSize: number,
+    flagEvent: Function
 }
 
 const EventTable = ({ 
@@ -19,7 +21,8 @@ const EventTable = ({
     sortBy,
     setSortBy, 
     getPage,
-    pageSize 
+    pageSize,
+    flagEvent
 }: ComponentProps): JSX.Element => {
 
     const selectedColumns = Object.values(columns) 
@@ -42,6 +45,7 @@ const EventTable = ({
                 <thead>
                     <tr>
                         <td>Detail View</td>
+                        <td>Flagged?</td>
                         {selectedColumns.map((c: Column, i: number) =>
                             <td 
                                 key={`col-${i}`}
@@ -68,6 +72,13 @@ const EventTable = ({
                             >
                                 <td>
                                     <EventDetail event={e} />
+                                </td>
+                                <td>
+                                    <FlagBox
+                                        event={e as Event} 
+                                        flagEvent={flagEvent}
+                                    /> 
+
                                 </td>
                                 {selectedColumns.map((c: Column, i: number) =>
                                     Object.keys(e)
