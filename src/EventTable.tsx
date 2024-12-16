@@ -27,6 +27,7 @@ const EventTable = ({
 
     const selectedColumns = Object.values(columns) 
         .filter((c: Column) => c.selected)
+        .filter((c: Column) => c.name !== "Flagged")
 
 
     const openDetailView = (e: any) => {
@@ -45,7 +46,10 @@ const EventTable = ({
                 <thead>
                     <tr>
                         <td>Detail View</td>
-                        <td>Flagged?</td>
+                        <td>
+                            Flagged?
+                            <FilterModal column={columns["Flagged"]} setFilter={setFilter} />
+                        </td>
                         {selectedColumns.map((c: Column, i: number) =>
                             <td 
                                 key={`col-${i}`}
@@ -78,7 +82,6 @@ const EventTable = ({
                                         event={e as Event} 
                                         flagEvent={flagEvent}
                                     /> 
-
                                 </td>
                                 {selectedColumns.map((c: Column, i: number) =>
                                     Object.keys(e)

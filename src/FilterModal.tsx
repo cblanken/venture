@@ -24,7 +24,13 @@ export default function FilterModal({column, setFilter}: ComponentProps) {
     }
 
     const updateFilter = (e:any) => {
+        console.log(column);
         let target: HTMLInputElement = e.target;
+        console.log(e);
+        column.name === "Flagged"
+        ?
+        setFilterInput(e.target.checked.toString())
+        : 
         setFilterInput(target.value);
     }
 
@@ -36,18 +42,35 @@ export default function FilterModal({column, setFilter}: ComponentProps) {
                 <form 
                     onSubmit={(e: any) => {
                         e.preventDefault();
-                        let target: HTMLFormElement | null = e.target;
-                        let input = target?.querySelector("input");
-                        setFilter(column.name, input?.value);
+                        // let target: HTMLFormElement | null = e.target;
+                        // let input = target?.querySelector("input");
+                        // setFilter(column.name, input?.value);
+                        setFilter(column.name, filterInput);
                         closeDialog(e);
                     }}
                 >
-                    <label>Match Pattern:</label>
-                    <input 
-                        type="text" 
-                        value={filterInput}
-                        onChange={updateFilter}
-                    />
+                    {
+                        column.name === "Flagged"
+                        ?
+                        <>
+                            <label>Filter Flagged?</label>
+                            <input 
+                                type="checkbox" 
+                                checked={filterInput === "true"} 
+                                onChange={updateFilter}
+                            />
+
+                        </>
+                        :
+                        <>
+                            <label>Match Pattern:</label>
+                            <input 
+                                type="text" 
+                                value={filterInput}
+                                onChange={updateFilter}
+                            />
+                        </>
+                    }
                     <button type="submit">Set Filter</button>
                 </form>
                 <button type="button" id="filter-modal-btn-close" onClick={closeDialog}>Close</button> 

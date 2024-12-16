@@ -83,6 +83,12 @@ println!("{filtered_columns:?}");
                     // We need to check the value's type.
                     let val = &event[&c.name];
                     match val {
+                        serde_json::Value::Bool(b) => {
+                            // This should only be a single situation,
+                            // but an important one: the `Flagged` Column.
+                            return b == &c.filter.parse::<bool>().unwrap();
+
+                        },
                         serde_json::Value::Number(n) => {
                             // int or float?
                             // Check int first because it could fail
