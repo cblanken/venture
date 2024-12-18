@@ -32,10 +32,15 @@
 }
 
 .event-table {
+  width: 100vw;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-x: auto;
 
   table {
-    display: block;
-    overflow-x: scroll;
+    min-width: 50vw;
+    margin-left: auto;
+    margin-right: auto;
   }
 
 }

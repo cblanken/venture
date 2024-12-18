@@ -40,8 +40,9 @@ const EventTable = ({
     const ascending = sortBy === null ? true : !sortBy.ascending;
 
     return (
-        <div className="event-table">
-            <h2>Loaded Events</h2>
+        <>
+        <h2>Loaded Events</h2>
+            <div className="event-table">
             <table>
                 <thead>
                     <tr>
@@ -52,14 +53,14 @@ const EventTable = ({
                         </td>
                         {selectedColumns.map((c: Column, i: number) =>
                             <td 
-                                key={`col-${i}`}
-                                onClick={() => {
-                                    setSortBy({
-                                        column: c,
-                                        ascending 
-                                    });
-                                    getPage(1, pageSize, selectedColumns);
-                                }}
+                            key={`col-${i}`}
+                            onClick={() => {
+                                setSortBy({
+                                    column: c,
+                                    ascending 
+                                });
+                                getPage(1, pageSize, selectedColumns);
+                            }}
                             >
                                 {c.name}
                                 <FilterModal column={c} setFilter={setFilter} />
@@ -71,9 +72,9 @@ const EventTable = ({
                     {
                         events.map((e: Object, idx: number) =>
                             <tr 
-                                key={idx}
-                                onDoubleClick={openDetailView}
-                            >
+                        key={idx}
+                        onDoubleClick={openDetailView}
+                        >
                                 <td>
                                     <EventDetail event={e} />
                                 </td>
@@ -81,7 +82,7 @@ const EventTable = ({
                                     <FlagBox
                                         event={e as Event} 
                                         flagEvent={flagEvent}
-                                    /> 
+                                        /> 
                                 </td>
                                 {selectedColumns.map((c: Column, i: number) =>
                                     Object.keys(e)
@@ -89,8 +90,8 @@ const EventTable = ({
                                     <td key={`${c.name}-${i}`}>
                                         {
                                             typeof ((e as any)[c.name]) == "object"
-                                                ? "Object"
-                                                : (e as any)[c.name]
+                                            ? "Object"
+                                            : (e as any)[c.name]
                                         }
                                     </td>
                                     : <td key={`${c.name}-${i}`}>-</td>
@@ -101,6 +102,7 @@ const EventTable = ({
                 </tbody>
             </table>
         </div>
+        </>
     )
 
 }
