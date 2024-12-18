@@ -93,7 +93,7 @@ const EventTable = ({
                                                 : (e as any)[c.name]
                                         }
                                     </td>
-                                    : ""
+                                    : <td key={`${c.name}-${i}`}>-</td>
                                 )}
                             </tr>
                         )
