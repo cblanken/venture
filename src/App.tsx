@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { 
+import {
   AppPhase,
-  PageResult, 
-  ColumnMap, 
+  PageResult,
+  ColumnMap,
   Column,
   SortBy,
   Event
 } from "./types";
 import { homeDir } from '@tauri-apps/api/path';
-import { open } from "@tauri-apps/plugin-dialog";
+import { open, save } from "@tauri-apps/plugin-dialog";
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import ColumnSelector from "./ColumnSelector";
 import CurrentFilters from "./CurrentFilters";
@@ -36,8 +36,8 @@ function App() {
   const [totalEvents, setTotalEvents]: [number, Function] = useState(0);
   const [pageSize, setPageSize]: [number, Function] = useState(DEFAULT_PAGE_SIZE);
 
-  async function getPage(selected: number, pageSize: number, newColumns: {[key: string]: Column} | null) {
-    let cols = newColumns || columns; 
+  async function getPage(selected: number, pageSize: number, newColumns: { [key: string]: Column } | null) {
+    let cols = newColumns || columns;
     let filteredColumns = Object.values(cols)
       .filter((c: Column) => c.filter != "");
     setAppPhase(AppPhase.PAGE_LOADING);
@@ -73,15 +73,17 @@ function App() {
       }]
     });
 
+
+
     setAppPhase(AppPhase.FILE_LOADING);
 
     let res: PageResult = await invoke("load_evtx", { selected });
     let events: Object[] = await res.events;
-    let columns: ColumnMap = {}; 
+    let columns: ColumnMap = {};
 
     // Transform the column names into proper Columns
     res.column_names.forEach((c: string) => {
-      columns[c] = { 
+      columns[c] = {
         name: c,
         selected: true,
         filter: ""
@@ -97,6 +99,21 @@ function App() {
     setAppPhase(AppPhase.FILE_LOADED);
   }
 
+  async function exportCsv() {
+    const path = await save({
+      filters: [
+        {
+          name: "CSV Filter",
+          extensions: ["csv"],
+        }
+      ],
+      defaultPath: "events.csv"
+    });
+    console.log(path);
+    let res = await invoke("export_csv", { path });
+    alert(`Exported to ${path}`);
+  }
+
   const setFilter = (columnName: string, filter: string) => {
     console.log(`Updating ${columnName}`)
     let oldCol: Column = columns[columnName];
@@ -106,7 +123,7 @@ function App() {
       filter
     };
     console.log(newCol.filter);
-    let newColumns = {...columns};
+    let newColumns = { ...columns };
     newColumns[columnName] = newCol;
     console.log(newColumns[columnName]);
     setColumns(newColumns);
@@ -115,9 +132,9 @@ function App() {
 
 
   const UiPhase = () => {
-    switch(Number(appPhase)) {
+    switch (Number(appPhase)) {
       case AppPhase.INIT:
-        return  <h2>Open a <code>.evtx</code> file to begin.</h2>;
+        return <h2>Open a <code>.evtx</code> file to begin.</h2>;
       case AppPhase.FILE_LOADING:
         return <h2>Loading...</h2>
       default:
@@ -125,17 +142,17 @@ function App() {
           <>
             <ColumnSelector columns={columns} setColumns={setColumns} />
             <CurrentFilters columns={columns} setFilter={setFilter} />
-            <EventTable 
-              events={events} 
-              columns={columns} 
-              setFilter={setFilter} 
+            <EventTable
+              events={events}
+              columns={columns}
+              setFilter={setFilter}
               sortBy={sortBy}
               setSortBy={setSortBy}
               getPage={getPage}
               pageSize={pageSize}
               flagEvent={flagEvent}
             />
-            <PageSizeSelector 
+            <PageSizeSelector
               pageSizes={PAGE_SIZES}
               pageSize={pageSize}
               setPageSize={setPageSize}
@@ -157,18 +174,22 @@ function App() {
     columnSelector.showModal();
 
   }
-  
+
 
   return (
     <main className="container">
       <h1>Venture</h1>
       <nav className="button-container">
-        <button type="button" onClick={async () =>{await getFile()}}>Open</button>
-        { Number(appPhase) == AppPhase.FILE_LOADED || Number(appPhase) == AppPhase.PAGE_LOADED ?
+        <button type="button" onClick={async () => { await getFile() }}>Open</button>
+        {Number(appPhase) == AppPhase.FILE_LOADED || Number(appPhase) == AppPhase.PAGE_LOADED ?
           <button onClick={openColumnSelector}>Select Columns</button>
           : null
         }
-        <button type="button" onClick={ async () => {await getCurrentWindow().close();} }>Quit</button>
+        {Number(appPhase) == AppPhase.FILE_LOADED || Number(appPhase) == AppPhase.PAGE_LOADED ?
+          <button onClick={exportCsv}>Export CSV</button>
+          : null
+        }
+        <button type="button" onClick={async () => { await getCurrentWindow().close(); }}>Quit</button>
       </nav>
       {
         UiPhase()

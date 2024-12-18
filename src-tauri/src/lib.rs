@@ -1,7 +1,7 @@
 use evtx;
 use serde::{Serialize, Deserialize};
 use serde_json::{Value, Map};
-use std::cmp::min;
+use std::{cmp::min, io::Write};
 use std::sync::Mutex;
 use tauri::{Builder, Manager, State};
 
@@ -254,6 +254,9 @@ async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageR
     // column names
     state.events.lock().unwrap().clone_from(&events);
     state.column_names.lock().unwrap().clone_from(&column_names);
+
+    // Return a single page to the frontend, while
+    // hanging on to the rest of the Events in state.
     Ok(PageResult {
         events: events[0..page_size].to_vec(),
         column_names: Some(column_names),
@@ -263,6 +266,11 @@ async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageR
     })
 }
 
+
+///
+/// Toggles an [Event] as "flagged." `Flagged` is a custom
+/// column added to all events for tracking.
+/// 
 #[tauri::command]
 async fn flag_event(event_id: u64, state: State<'_, AppState>) -> Result<(),()> {
 
@@ -272,6 +280,8 @@ async fn flag_event(event_id: u64, state: State<'_, AppState>) -> Result<(),()> 
     let new_events = events
     .iter_mut()
     .map(|e| {
+        // EventRecordID is present on all Windows Event Log records, and is
+        // a usable unique ID.
         let record_id = e.get("EventRecordID").unwrap().as_u64().unwrap();
         if record_id == event_id {
             println!("Found {record_id}");
@@ -288,6 +298,51 @@ async fn flag_event(event_id: u64, state: State<'_, AppState>) -> Result<(),()> 
     Ok(())
 }
 
+
+#[tauri::command]
+async fn export_csv(path: String, state: State<'_, AppState>) -> Result<(),()> {
+    println!("Exporting to: {path}");
+
+    // Load up state
+    let events = state.events.lock().unwrap();
+    let column_names = state.column_names.lock().unwrap();
+
+    // Generate header
+    let mut header = column_names.join(",");
+    header.push_str("\n");
+
+    // Write header
+    let mut file = std::fs::File::create(path).unwrap();
+    file.write_all(header.as_bytes()).unwrap();
+
+    // Create rows from 
+    let rows: Vec<String> = events
+        .iter()
+        .map(|e| {
+            let mut row = String::new();
+
+            for column in column_names.iter() {
+                if e.contains_key(column) {
+                    let val = e.get(column).unwrap();
+                    row.push_str(format!("{val}").as_str());
+                }
+                row.push_str(",");
+            }
+            row.push_str("\n");
+
+            return row;
+        })
+        .collect();
+
+    // Write out the rows
+    for row in rows {
+        file.write(row.as_bytes()).unwrap();
+    }
+    
+    Ok(())
+
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     Builder::default()
@@ -301,7 +356,7 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![load_evtx, select_page, flag_event])
+        .invoke_handler(tauri::generate_handler![load_evtx, select_page, flag_event, export_csv])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
