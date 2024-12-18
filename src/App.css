@@ -17,6 +17,7 @@
 }
 
 .container {
+  width: 100vw;
   margin: 0;
   padding-top: 1vh;
   display: flex;
@@ -28,6 +29,15 @@
 .row {
   display: flex;
   justify-content: center;
+}
+
+.event-table {
+
+  table {
+    display: block;
+    overflow-x: scroll;
+  }
+
 }
 
 

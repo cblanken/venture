@@ -40,7 +40,7 @@ const EventTable = ({
     const ascending = sortBy === null ? true : !sortBy.ascending;
 
     return (
-        <>
+        <div className="event-table">
             <h2>Loaded Events</h2>
             <table>
                 <thead>
@@ -100,7 +100,7 @@ const EventTable = ({
                     }
                 </tbody>
             </table>
-        </>
+        </div>
     )
 
 }
