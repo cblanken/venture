@@ -113,6 +113,21 @@ function App() {
     let res = await invoke("export_csv", { path });
     alert(`Exported to ${path}`);
   }
+  
+  async function exportJson() {
+    const path = await save({
+      filters: [
+        {
+          name: "JSON Filter",
+          extensions: ["json"],
+        }
+      ],
+      defaultPath: "events.json"
+    });
+    console.log(path);
+    let res = await invoke("export_json", { path });
+    alert(`Exported to ${path}`);
+  }
 
   const setFilter = (columnName: string, filter: string) => {
     console.log(`Updating ${columnName}`)
@@ -187,6 +202,10 @@ function App() {
         }
         {Number(appPhase) == AppPhase.FILE_LOADED || Number(appPhase) == AppPhase.PAGE_LOADED ?
           <button onClick={exportCsv}>Export CSV</button>
+          : null
+        }
+        {Number(appPhase) == AppPhase.FILE_LOADED || Number(appPhase) == AppPhase.PAGE_LOADED ?
+          <button onClick={exportJson}>Export JSON</button>
           : null
         }
         <button type="button" onClick={async () => { await getCurrentWindow().close(); }}>Quit</button>

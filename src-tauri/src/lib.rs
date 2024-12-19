@@ -343,6 +343,24 @@ async fn export_csv(path: String, state: State<'_, AppState>) -> Result<(),()> {
 
 }
 
+#[tauri::command]
+async fn export_json(path: String, state: State<'_, AppState>) -> Result<(),()> {
+    println!("Exporting to: {path}");
+
+    // Load up state
+    let events = state.events.lock().unwrap();
+
+    // Get file
+    let mut file = std::fs::File::create(path).unwrap();
+    // Do serde stuff
+    let json_str = serde_json::to_string_pretty(events.as_slice()).unwrap();
+    file.write_all(json_str.as_bytes()).unwrap();
+
+    Ok(())
+
+}
+
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     Builder::default()
@@ -356,7 +374,13 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![load_evtx, select_page, flag_event, export_csv])
+        .invoke_handler(tauri::generate_handler![
+            load_evtx, 
+            select_page, 
+            flag_event, 
+            export_csv,
+            export_json
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
