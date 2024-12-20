@@ -116,6 +116,13 @@ button {
   }
 }
 
+
+nav {
+  button {
+    margin: 0px .1rem;
+  }
+}
+
 /* Begin Venture Customizations */
 .filter-container {
 
@@ -147,6 +154,12 @@ button {
 
 }
 
+.btn-filter {
+  margin-left: 5px;
+  cursor: pointer;
+  display: block;
+}
+
 .column-selector {
   select {
     width: 100%;
@@ -159,6 +172,10 @@ table {
 
   thead {
     font-weight: 800;
+
+    tr td {
+      border: .5rem solid #00000000;
+    }
   }
 
   tbody {

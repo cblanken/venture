@@ -36,7 +36,7 @@ export default function FilterModal({column, setFilter}: ComponentProps) {
 
     return (
         <>
-            <span className="filter-btn" onClick={openDialog}> [F]</span>
+            <i className="icofont-filter btn-filter" onClick={openDialog}></i>
             <dialog className="filter-dialog">
                 <h3>Filter {column.name}</h3>
                 <form 

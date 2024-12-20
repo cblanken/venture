@@ -1,0 +1,13 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg">
+<defs>
+<font id="icofont" horiz-adv-x="1000" >
+<font-face font-family="IcoFont" font-weight="400" font-style="Regular" units-per-em="1000" ascent="850" descent="-150" />
+<missing-glyph horiz-adv-x="1000" />
+<glyph glyph-name="filter" horiz-adv-x="1000" unicode="&#xef29;" d="M395 374c9-10 14-23 14-36v-397c0-23 29-36 47-19l112 127c15 18 23 26 23 44v245c0 13 5 26 14 36l322 344c24 26 5 68-30 68h-793c-36 0-55-42-31-68l322-344z" />
+<glyph glyph-name="search-1" horiz-adv-x="1000" unicode="&#xed11;" d="M800 146c-7 8-8 20-2 29 44 68 69 148 69 235 0 239-194 434-433 434-239 0-434-195-434-434 0-239 195-434 434-434 93 0 179 30 250 80 8 6 21 6 28-2l155-155c1-1 2-2 3-3 2-1 9-8 17-15l18-19c7-7 19-7 26 0l64 64c7 7 7 19 0 26l-195 194z m-104 62c-14-19-30-36-48-51-58-49-133-79-214-79-183 0-332 149-332 332s149 332 332 332c183 0 331-149 331-332 0-76-26-146-69-202z" />
+<glyph glyph-name="minus-circle" horiz-adv-x="1000" unicode="&#xef98;" d="M500 788c-242 0-437-196-437-438 0-242 195-438 437-438 242 0 438 196 438 438 0 242-196 438-438 438z m302-467c-1-9-2-19-5-30h-594c-2 11-4 21-5 31-1 10-1 20-1 30 0 9 0 18 1 27 1 9 3 19 5 30h594c3-11 4-21 5-31 1-10 1-20 1-30 0-9 0-18-1-27z" />
+</font>
+</defs>
+</svg>

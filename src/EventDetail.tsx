@@ -28,7 +28,9 @@ const EventDetail = ({event}: ComponentProps) => {
 
     return (
         <div className="event-detail-container">
-            <button onClick={dialogOpen}>+</button>
+            <button onClick={dialogOpen}>
+                <i className="icofont-search-1"></i>
+            </button>
             <dialog className="event-detail">
                 <h3>Event Detail</h3>
                 <pre dangerouslySetInnerHTML={{__html: hljs.highlight(

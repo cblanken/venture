@@ -21,7 +21,7 @@ export default function CurrentFilters({ columns, setFilter }: ComponentProps) {
                                 className="remove-filter"
                                 onClick={() => (setFilter(c.name, ""))}
                             >
-                                [X]
+                                <i className="icofont-minus-circle"></i>
                             </span>
                         </li>
                         : null
