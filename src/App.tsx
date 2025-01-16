@@ -111,7 +111,7 @@ function App() {
       defaultPath: "events.csv"
     });
     console.log(path);
-    let res = await invoke("export_csv", { path });
+    await invoke("export_csv", { path });
     alert(`Exported to ${path}`);
   }
   
@@ -126,7 +126,7 @@ function App() {
       defaultPath: "events.json"
     });
     console.log(path);
-    let res = await invoke("export_json", { path });
+    await invoke("export_json", { path });
     alert(`Exported to ${path}`);
   }
 
