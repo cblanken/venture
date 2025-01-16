@@ -29,3 +29,7 @@ While projects like `evtxtools` do a great job on the command line, sometimes a 
 1. Install the application
 2. Open a `.evtx` file
 3. Use filters, click on columns for sorting, and flag interesting items.
+
+## Acknowledgements
+
+This project is created with the support of [UCLA Health](https://uclahealth.org). Many thanks for the freedom to build this program for all!
