@@ -31,20 +31,6 @@
   justify-content: center;
 }
 
-.event-table {
-  width: 100vw;
-  margin-left: auto;
-  margin-right: auto;
-  overflow-x: auto;
-
-  table {
-    min-width: 50vw;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-}
-
 
 a {
   font-weight: 500;
@@ -76,6 +62,7 @@ button {
 
 button {
   cursor: pointer;
+  vertical-align: middle;
 }
 
 button:hover {
@@ -91,7 +78,9 @@ button {
   outline: none;
 }
 
-
+dialog {
+  border: none;
+}
 
 
 @media (prefers-color-scheme: dark) {
@@ -163,6 +152,49 @@ nav {
 .column-selector {
   select {
     width: 100%;
+    margin-bottom: 10px;
+    height: 70%;
+  }
+  height: 80vh;
+  width: 30vw;
+}
+
+.event-table {
+  width: 100vw;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-x: auto;
+
+  table {
+    min-width: 50vw;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+}
+
+.event-detail {
+  width: 90vw;
+  height: 90vh;
+}
+
+.page-size-selector {
+  margin-top: 10px;
+  select {
+    margin-left: 3px;
+  }
+}
+
+.paginator {
+  button {
+    margin: 0px 2px;
+  }
+}
+
+.filter-dialog, .column-selector {
+  color: light-dark(var(--main-color), var(--main-background-color));
+  background: light-dark(#313131, #cecece);
+  form {
     margin-bottom: 10px;
   }
 }
