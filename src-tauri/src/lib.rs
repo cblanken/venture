@@ -1,4 +1,3 @@
-use evtx;
 use serde::{Serialize, Deserialize};
 use serde_json::{Value, Map};
 use std::{cmp::min, io::Write};
@@ -109,7 +108,7 @@ println!("{filtered_columns:?}");
                     }
                 }
                 // If the Event doesn't have the column, drop it
-                return false;
+                false
             })
     })
     .collect()
@@ -309,7 +308,7 @@ async fn export_csv(path: String, state: State<'_, AppState>) -> Result<(),()> {
 
     // Generate header
     let mut header = column_names.join(",");
-    header.push_str("\n");
+    header.push('\n');
 
     // Write header
     let mut file = std::fs::File::create(path).unwrap();
@@ -326,17 +325,17 @@ async fn export_csv(path: String, state: State<'_, AppState>) -> Result<(),()> {
                     let val = e.get(column).unwrap();
                     row.push_str(format!("{val}").as_str());
                 }
-                row.push_str(",");
+                row.push(',');
             }
-            row.push_str("\n");
+            row.push('\n');
 
-            return row;
+            row
         })
         .collect();
 
     // Write out the rows
     for row in rows {
-        file.write(row.as_bytes()).unwrap();
+        file.write_all(row.as_bytes()).unwrap();
     }
     
     Ok(())
