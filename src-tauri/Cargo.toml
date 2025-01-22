@@ -1,6 +1,6 @@
 [package]
 name = "Venture"
-version = "0.1.0"
+version = "0.2.0"
 description = "A GUI Windows Event Log parser"
 authors = ["Michael Taggart <mtaggart@mednet.ucla.edu>"]
 edition = "2021"
