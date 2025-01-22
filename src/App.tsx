@@ -65,16 +65,16 @@ function App() {
   async function getFile() {
     const selected = await open({
       directory: false,
-      multiple: false,
+      multiple: true,
       defaultPath: await homeDir(),
-      title: "Select Event File",
+      title: "Select Event Files",
       filters: [{
         extensions: ["evtx"],
         name: ""
       }]
     });
 
-
+    console.log(selected);
 
     setAppPhase(AppPhase.FILE_LOADING);
 

@@ -175,62 +175,71 @@ async fn select_page(selected: usize, page_size: usize, filtered_columns:Vec<Col
 
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 #[tauri::command]
-async fn load_evtx(selected: String, state: State<'_, AppState>) -> Result<PageResult, ()> {
-    let mut parser = evtx::EvtxParser::from_path(selected).unwrap();
-    let events: Vec<Event> = parser.records_json_value()
-        .map(|r| {
-            // We're flattening the the Event object here to make
-            // EvetData and System data on the same level
-            let mut data: Event = r.unwrap()
-                .data["Event"]
-                .as_object_mut()
-                .unwrap()
-                .to_owned();
+async fn load_evtx(selected: Vec<String>, state: State<'_, AppState>) -> Result<PageResult, ()> {
 
-            let mut e: Event = data["System"]
-                .clone()
-                .as_object_mut()
-                .unwrap()
-                .to_owned();
+    let mut events: Vec<Event> = Vec::new();
 
-            if data.contains_key("EventData") {
-                e.append(
-                    data["EventData"]
+    for s in selected {
+        let mut parser = evtx::EvtxParser::from_path(&s).unwrap();
+        let mut path_events: Vec<Event> = parser.records_json_value()
+            .map(|r| {
+                // We're flattening the the Event object here to make
+                // EvetData and System data on the same level
+                let mut data: Event = r.unwrap()
+                    .data["Event"]
                     .as_object_mut()
-                    .unwrap_or(&mut Map::new())
-                );
-            }
-
-            // Process #attributes objects
-            // Why is this a for loop inside a map?
-            // It feels more semantic because it's an iterative process
-            // more than a wholesale transformation.
-            for (k, v) in e.clone() {
-               if v.is_object() {
-                let v_obj: &Map<String, Value> = v.as_object().unwrap();
-                if v_obj.contains_key("#attributes") {
-                   let v_attrs = v_obj.get("#attributes")
                     .unwrap()
-                    .as_object()
-                    .unwrap();
-
-                   for (attr, val) in v_attrs {
-                    let new_key = format!("{k}.{attr}");
-                    e.insert(new_key, val.clone());
-                   }
-                   // Remove original #attributes key
-                   e.remove(&k);
+                    .to_owned();
+    
+                let mut e: Event = data["System"]
+                    .clone()
+                    .as_object_mut()
+                    .unwrap()
+                    .to_owned();
+    
+                if data.contains_key("EventData") {
+                    e.append(
+                        data["EventData"]
+                        .as_object_mut()
+                        .unwrap_or(&mut Map::new())
+                    );
                 }
+    
+                // Process #attributes objects
+                // Why is this a for loop inside a map?
+                // It feels more semantic because it's an iterative process
+                // more than a wholesale transformation.
+                for (k, v) in e.clone() {
+                   if v.is_object() {
+                    let v_obj: &Map<String, Value> = v.as_object().unwrap();
+                    if v_obj.contains_key("#attributes") {
+                       let v_attrs = v_obj.get("#attributes")
+                        .unwrap()
+                        .as_object()
+                        .unwrap();
+    
+                       for (attr, val) in v_attrs {
+                        let new_key = format!("{k}.{attr}");
+                        e.insert(new_key, val.clone());
+                       }
+                       // Remove original #attributes key
+                       e.remove(&k);
+                    }
+    
+                   } 
+                };
+    
+                // Inject the "Flagged" Column
+                e.insert("Flagged".to_string(), serde_json::Value::Bool(false));
 
-               } 
-            };
+                // Insert the SourceFile Column
+                e.insert("SourceFile".to_string(), serde_json::Value::String(s.clone()));
+                e
+            })
+            .collect();
+        events.append(&mut path_events);
+    }
 
-            // Inject the "Flagged" Column
-            e.insert("Flagged".to_string(), serde_json::Value::Bool(false));
-
-            e
-        })
-        .collect();
     // This is needed for lil baby evtx files.
     let page_size = min(events.len(), DEFAULT_PAGE_SIZE);
 
